@@ -110,20 +110,6 @@ std::pair<SurakartaEndReason, SurakartaPlayer> SurakartaRuleManager::JudgeEnd(co
     if (oppo_remain == 0)
         return std::pair(SurakartaEndReason::CHECKMATE, curr_colour);
 
-    // Checkmate checkmate:
-    // const auto util = SurakartaPieceCanCaptureUtil(board_);
-    // if (oppo_remain == 1) {
-    //     for (const auto& column : *board_) {
-    //         for (const auto& piece : column) {
-    //             if (piece->GetColor() == curr_colour) {
-    //                 if (util.CanCaptureOpponentPiece(*piece)) {
-    //                     return std::pair(SurakartaEndReason::CHECKMATE, curr_colour);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
     if (game_info_->num_round_ - last_capture_round >= game_info_->max_no_capture_round_) {
         if (curr_remain > oppo_remain)
             return std::pair(SurakartaEndReason::STALEMATE, curr_colour);
@@ -132,25 +118,6 @@ std::pair<SurakartaEndReason, SurakartaPlayer> SurakartaRuleManager::JudgeEnd(co
         else
             return std::pair(SurakartaEndReason::STALEMATE, SurakartaPlayer::NONE);
     }
-
-    // bool oppo_colour_has_piece = false;
-    // bool oppo_colour_movable = false;
-
-    // const auto util2 = SurakartaPieceMovableUtil(board_);
-    // for (const auto& column : *board_) {
-    //     for (const auto& piece : column) {
-    //         if (piece->GetColor() == oppo_colour) {
-    //             oppo_colour_has_piece = true;
-    //             // if (util2.IsMovable(*piece))
-    //             //     oppo_colour_movable = true;
-    //         }
-    //     }
-    // }
-
-    // if (oppo_colour_has_piece == false)
-    //     return std::pair(SurakartaEndReason::CHECKMATE, curr_colour);
-    // if (oppo_colour_movable == false)
-    //     return std::pair(SurakartaEndReason::CHECKMATE, curr_colour);
 
     return std::pair(SurakartaEndReason::NONE, PieceColor::NONE);
 }

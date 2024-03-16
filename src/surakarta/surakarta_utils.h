@@ -170,34 +170,34 @@ inline std::ostream& operator<<(std::ostream& os, const SurakartaDirection& dir)
     return os;
 }
 
-class SurakartaPieceMovableUtil {
-   private:
-    const std::shared_ptr<const SurakartaBoard> board_;
-    const SurakartaPieceMoveUtil util_;
+// class SurakartaPieceMovableUtil {
+//    private:
+//     const std::shared_ptr<const SurakartaBoard> board_;
+//     const SurakartaPieceMoveUtil util_;
 
-   public:
-    SurakartaPieceMovableUtil(std::shared_ptr<const SurakartaBoard> board)
-        : board_(board), util_(board->board_size_) {}
+//    public:
+//     SurakartaPieceMovableUtil(std::shared_ptr<const SurakartaBoard> board)
+//         : board_(board), util_(board->board_size_) {}
 
-    bool IsMovable(const SurakartaPiece& piece) const {
-        const auto position = piece.GetPosition();
-        for (const auto direction : SurakartaDirectionStraightList) {
-            const auto pair_opt = util_.Next(std::pair(position, direction));
-            if (pair_opt.has_value()) {
-                const auto position = pair_opt.value().first;
-                if ((*board_)[position.x][position.y]->GetColor() == PieceColor::NONE)
-                    return true;
-            }
-        }
-        for (const auto direction : SurakartaDirectionNotStraightList) {
-            const auto next_position = position + direction;
-            if (board_->IsInside(SurakartaPosition(next_position.first, next_position.second)))
-                if ((*board_)[next_position.first][next_position.second]->GetColor() == PieceColor::NONE)
-                    return true;
-        }
-        return false;
-    }
-};
+//     bool IsMovable(const SurakartaPiece& piece) const {
+//         const auto position = piece.GetPosition();
+//         for (const auto direction : SurakartaDirectionStraightList) {
+//             const auto pair_opt = util_.Next(std::pair(position, direction));
+//             if (pair_opt.has_value()) {
+//                 const auto position = pair_opt.value().first;
+//                 if ((*board_)[position.x][position.y]->GetColor() == PieceColor::NONE)
+//                     return true;
+//             }
+//         }
+//         for (const auto direction : SurakartaDirectionNotStraightList) {
+//             const auto next_position = position + direction;
+//             if (board_->IsInside(SurakartaPosition(next_position.first, next_position.second)))
+//                 if ((*board_)[next_position.first][next_position.second]->GetColor() == PieceColor::NONE)
+//                     return true;
+//         }
+//         return false;
+//     }
+// };
 
 // class SurakartaPieceCanCaptureUtil {
 //    private:
