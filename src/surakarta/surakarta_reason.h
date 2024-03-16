@@ -5,19 +5,19 @@
 // TODO: Read the following comments carefully.
 // Don't implement anything with 'unused' comments.
 
-enum class SurakartaIllegalMoveReason {  // 定义一系列常量 0~x, 可读性变强
-    LEGAL,                               // unused
-    LEGAL_CAPTURE_MOVE,                  // capture a opponent's piece, and the move consists at least one corner loop
-    LEGAL_NON_CAPTURE_MOVE,              // just as the name
-    ILLIGAL,                             // unused
-    NOT_PLAYER_TURN,                     // unused, move when it's not the player's turn.
-    OUT_OF_BOARD,                        // from or to position is out of board
-    NOT_PIECE,                           // move a position that is not a piece
-    NOT_PLAYER_PIECE,                    // move a piece that is not the player's
-    ILLIGAL_CAPTURE_MOVE,                // try to capture a opponent's piece, but the move can't consist any corner loop
-    ILLIGAL_NON_CAPTURE_MOVE,            // otherwise
-    GAME_ALREADY_END,                    // unused
-    GAME_NOT_START                       // unused
+enum class SurakartaIllegalMoveReason {
+    LEGAL,                     // unused
+    LEGAL_CAPTURE_MOVE,        // capture a opponent's piece, and the move consists at least one corner loop
+    LEGAL_NON_CAPTURE_MOVE,    // just as the name
+    ILLIGAL,                   // unused
+    NOT_PLAYER_TURN,           // unused, move when it's not the player's turn.
+    OUT_OF_BOARD,              // from or to position is out of board
+    NOT_PIECE,                 // move a position that is not a piece
+    NOT_PLAYER_PIECE,          // move a piece that is not the player's
+    ILLIGAL_CAPTURE_MOVE,      // try to capture a opponent's piece, but the move can't consist any corner loop
+    ILLIGAL_NON_CAPTURE_MOVE,  // otherwise
+    GAME_ALREADY_END,          // unused
+    GAME_NOT_START             // unused
 };
 
 enum class SurakartaEndReason {

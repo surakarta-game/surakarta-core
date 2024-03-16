@@ -11,7 +11,7 @@ class SurakartRow : public std::vector<std::shared_ptr<SurakartaPiece>> {
     SurakartRow(unsigned int board_size)
         : std::vector<std::shared_ptr<SurakartaPiece>>(board_size) {}
 };
-//*    派生类Board  (儿子)   继承方式     基类名Row (爸爸)
+
 class SurakartaBoard : public std::vector<SurakartRow> {
    public:
     unsigned int board_size_;
@@ -19,7 +19,6 @@ class SurakartaBoard : public std::vector<SurakartRow> {
         : board_size_(board_size) {
         for (unsigned int i = 0; i < board_size_; i++) {
             this->push_back(SurakartRow(board_size_));
-            //*push_back 将一个新的元素加到vector的最后面
         }
     }
 

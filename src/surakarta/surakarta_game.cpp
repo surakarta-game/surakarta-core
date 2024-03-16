@@ -3,7 +3,7 @@
 #include <iostream>
 
 void SurakartaGame::StartGame(std::string file_name) {
-    if (file_name.empty()) {  //* 初始化棋盘
+    if (file_name.empty()) {
         for (unsigned int y = 0; y < board_size_; y++) {
             for (unsigned int x = 0; x < board_size_; x++) {
                 if (y < 2) {
