@@ -16,7 +16,10 @@ class SurakartaPieceMoveUtil {
     SurakartaPieceMoveUtil(const int board_size)
         : board_size_(board_size){};
 
-    std::optional<std::pair<SurakartaPosition, SurakartaDirection>> Next(const SurakartaPosition position, const SurakartaDirection direction) {
+    using PositionDirectionPair = std::pair<SurakartaPosition, SurakartaDirection>;
+    std::optional<PositionDirectionPair> Next(PositionDirectionPair pair) const {
+        const auto position = pair.first;
+        const auto direction = pair.second;
         const std::pair<int, int> next =
             direction == SurakartaDirection::UP
                 ? std::pair(position.x, position.y - 1)
