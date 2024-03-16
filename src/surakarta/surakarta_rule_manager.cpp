@@ -1,5 +1,6 @@
 #include "surakarta_rule_manager.h"
 #include <iostream>
+#include "surakarta_utils.h"
 
 void SurakartaRuleManager::OnUpdateBoard() {
     // TODO:
@@ -9,29 +10,86 @@ void SurakartaRuleManager::OnUpdateBoard() {
 }
 
 SurakartaIllegalMoveReason SurakartaRuleManager::JudgeMove(const SurakartaMove& move) {
-    // TODO: Implement this function.
+    // Ensure move is really a move:
+    if (board_->IsInside(move.from) == false || board_->IsInside(move.to) == false)
+        return SurakartaIllegalMoveReason::OUT_OF_BOARD;
+    if (move.from.x == move.to.x && move.from.y == move.to.y)
+        return SurakartaIllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE;
 
-    // An example of how to get the color of a piece and the current player.
-    for (unsigned int i = 0; i < board_size_; i++) {
-        for (unsigned int j = 0; j < board_size_; j++) {
-            PieceColor color = (*board_)[i][j]->GetColor();
-            if (color == PieceColor::BLACK) {
-                // i,j is the position of a black piece
-            } else if (color == PieceColor::WHITE) {
-                // i,j is the position of a white piece
-            } else {
-                // i,j is an empty position
+    // Some useful values:
+    const auto piece_from = (*board_)[move.from.x][move.from.y];
+    const auto piece_to = (*board_)[move.to.x][move.to.y];
+    const auto color_from = piece_from->GetColor();
+    const auto color_to = piece_to->GetColor();
+    const auto curr_player = game_info_->current_player_;
+    const auto oppo_player = ReverseColor(curr_player);
+
+    // Ensure color is correct:
+    if (color_from == PieceColor::NONE)
+        return SurakartaIllegalMoveReason::NOT_PIECE;
+    if (color_from != curr_player)
+        return SurakartaIllegalMoveReason::NOT_PLAYER_PIECE;
+    if (color_to != oppo_player && color_to != PieceColor::NONE) {
+        return SurakartaIllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE;
+    }
+
+    const SurakartaDirection directions[] = {
+        SurakartaDirection::UP,
+        SurakartaDirection::DOWN,
+        SurakartaDirection::LEFT,
+        SurakartaDirection::RIGHT,
+    };
+    const auto util = SurakartaPieceMoveUtil(board_size_);
+    if (piece_to->GetColor() == PieceColor::NONE) {  // Non-capture case:
+        // Try to reach move.to from four directions:
+        for (const auto direction : directions) {
+            auto curr_position = move.from;
+            while (true) {
+                const auto next_pair_opt = util.Next(std::pair(curr_position, direction));  // Try move a step
+                if (next_pair_opt.has_value() == false)                                     // At corner
+                    break;
+                auto [next_position, next_direction] = next_pair_opt.value();
+                curr_position = next_position;
+                if (next_direction != direction)  // Has gone through a quarter
+                    break;
+                if (curr_position == move.to) {  // Reached
+                    return SurakartaIllegalMoveReason::LEGAL_NON_CAPTURE_MOVE;
+                }
+                if ((*board_)[curr_position.x][curr_position.y]->GetColor() != PieceColor::NONE)  // Encountered a piece
+                    break;
             }
         }
+        // Can't reach move.to from four directions:
+        return SurakartaIllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE;
+    } else {  // Capture case:
+        for (const auto start_direction : directions) {
+            auto curr_position = move.from;
+            auto curr_direction = start_direction;
+            int passed_corner_cnt = 0;
+            while (true) {
+                const auto next_pair_opt = util.Next(std::pair(curr_position, curr_direction));  // Try move a step
+                if (next_pair_opt.has_value() == false)                                          // At corner
+                    break;
+                auto [next_position, next_direction] = next_pair_opt.value();
+                curr_position = next_position;
+                if (next_direction != curr_direction)  // Has gone through a quarter
+                    passed_corner_cnt++;
+                curr_direction = next_direction;
+                if (curr_position == move.to) {  // Reached
+                    if (passed_corner_cnt > 0)
+                        return SurakartaIllegalMoveReason::LEGAL_CAPTURE_MOVE;
+                    else
+                        break;  // Must pass a corner before capture
+                }
+                // Encountered another piece (not self):
+                if (curr_position != move.from && (*board_)[curr_position.x][curr_position.y]->GetColor() != PieceColor::NONE)
+                    break;
+                if (curr_position == move.from && passed_corner_cnt == 4)  // Has gone back
+                    break;
+            }
+        }
+        return SurakartaIllegalMoveReason::ILLIGAL_CAPTURE_MOVE;
     }
-    SurakartaPlayer current_player = game_info_->current_player_;
-    if (current_player == SurakartaPlayer::BLACK) {
-        // black player's turn
-    } else if (current_player == SurakartaPlayer::WHITE) {
-        // white player's turn
-    }
-
-    return SurakartaIllegalMoveReason::LEGAL;
 }
 
 std::pair<SurakartaEndReason, SurakartaPlayer> SurakartaRuleManager::JudgeEnd(const SurakartaIllegalMoveReason reason) {

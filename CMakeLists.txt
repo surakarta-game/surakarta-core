@@ -10,6 +10,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(INSTALL_DIR ${CMAKE_SOURCE_DIR}/surakarta_ta)
 
+# add_compile_options(-fsanitize=address)
+# add_compile_options(-g)
+# add_link_options(-fsanitize=address)
+
 set(CMAKE_CXX_FLAGS "-O2 -Wall -Wextra")
 set(ENV "TEST" CACHE STRING "DEV or TEST, for students, please use TEST")
 
