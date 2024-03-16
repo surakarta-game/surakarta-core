@@ -11,7 +11,6 @@
 
 int main() {
     SurakartaGame game;
-    game.GetRuleManager()->HelloWorld();
     game.StartGame();
 
     // TODO: After you pass the test, uncomment the following code, you should see a random game.
