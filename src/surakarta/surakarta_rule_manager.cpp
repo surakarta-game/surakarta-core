@@ -25,6 +25,8 @@ SurakartaIllegalMoveReason SurakartaRuleManager::JudgeMove(const SurakartaMove& 
     // Ensure color is correct:
     if (color_from == PieceColor::NONE)
         return SurakartaIllegalMoveReason::NOT_PIECE;
+    if (move.player != curr_player)
+        return SurakartaIllegalMoveReason::NOT_PLAYER_TURN;
     if (color_from != curr_player)
         return SurakartaIllegalMoveReason::NOT_PLAYER_PIECE;
     if (color_to != oppo_player && color_to != PieceColor::NONE) {
