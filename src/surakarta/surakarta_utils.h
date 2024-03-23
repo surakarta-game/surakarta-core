@@ -1,4 +1,9 @@
+#ifndef SURAKARTA_UTILS_H
+#define SURAKARTA_UTILS_H
+
+#include <list>
 #include <optional>
+#include <tuple>
 #include "surakarta_common.h"
 
 enum class SurakartaDirectionStraight {
@@ -315,27 +320,86 @@ class SurakartaGetAllLegalTargetUtil {
     }
 };
 
-class SurakartaApplyMoveFunctionallyUtil {
+class SurakartaGetAllLegalMovesUtil {
    private:
+    const unsigned int board_size_;
     const std::shared_ptr<const SurakartaBoard> board_;
+    const SurakartaGetAllLegalTargetUtil util_;
 
    public:
-    SurakartaApplyMoveFunctionallyUtil(std::shared_ptr<const SurakartaBoard> board)
-        : board_(board) {}
+    SurakartaGetAllLegalMovesUtil(std::shared_ptr<const SurakartaBoard> board)
+        : board_size_(board->board_size_), board_(board), util_(board) {}
 
-    std::unique_ptr<SurakartaBoard> ApplyMoveFunctionally(const SurakartaMove& move) const {
-        auto new_board = std::make_unique<SurakartaBoard>(board_->board_size_);
-        for (unsigned int i = 0; i < board_->board_size_; i++) {
-            for (unsigned int j = 0; j < board_->board_size_; j++) {
-                (*new_board)[i][j] = (*board_)[i][j];
+    std::unique_ptr<std::vector<SurakartaMove>> GetAllLegalMoves(PieceColor colour) const {
+        auto result = std::make_unique<std::vector<SurakartaMove>>();
+        for (unsigned int i = 0; i < board_size_; i++) {
+            for (unsigned int j = 0; j < board_size_; j++) {
+                const auto piece = (*board_)[i][j];
+                if (piece->GetColor() == colour) {
+                    const auto targets = util_.GetAllLegalTarget(*piece);
+                    for (const auto pos : *targets) {
+                        result->push_back(SurakartaMove(SurakartaPosition(i, j), pos, colour));
+                    }
+                }
             }
         }
+        return result;
+    }
+};
+
+// class SurakartaApplyMoveFunctionallyUtil {
+//    private:
+//     const std::shared_ptr<const SurakartaBoard> board_;
+
+//    public:
+//     SurakartaApplyMoveFunctionallyUtil(std::shared_ptr<const SurakartaBoard> board)
+//         : board_(board) {}
+
+//     std::unique_ptr<SurakartaBoard> ApplyMoveFunctionally(const SurakartaMove& move) const {
+//         auto new_board = std::make_unique<SurakartaBoard>(board_->board_size_);
+//         for (unsigned int i = 0; i < board_->board_size_; i++) {
+//             for (unsigned int j = 0; j < board_->board_size_; j++) {
+//                 (*new_board)[i][j] = (*board_)[i][j];
+//             }
+//         }
+//         const auto from = move.from;
+//         const auto to = move.to;
+//         const auto piece = (*new_board)[from.x][from.y];
+//         (*new_board)[from.x][from.y] = std::make_shared<SurakartaPiece>(from, PieceColor::NONE);
+//         (*new_board)[to.x][to.y] = piece;
+//         return new_board;
+//     }
+// };
+
+class SurakartaApplyMoveUtil {
+   private:
+    const std::shared_ptr<const SurakartaBoard> board_;
+    std::list<std::tuple<unsigned int, unsigned int, PieceColor>> revert_list_;
+
+    void Pop() {
+        auto tuple = revert_list_.back();
+        (*board_)[std::get<0>(tuple)][std::get<1>(tuple)]->SetColor(std::get<2>(tuple));
+        revert_list_.pop_back();
+    }
+
+   public:
+    SurakartaApplyMoveUtil(std::shared_ptr<const SurakartaBoard> board)
+        : board_(board) {}
+
+    void ApplyMove(const SurakartaMove& move) {
         const auto from = move.from;
         const auto to = move.to;
-        const auto piece = (*new_board)[from.x][from.y];
-        (*new_board)[from.x][from.y] = std::make_shared<SurakartaPiece>(from, PieceColor::NONE);
-        (*new_board)[to.x][to.y] = piece;
-        return new_board;
+        const auto piece_from = (*board_)[from.x][from.y];
+        const auto pitce_to = (*board_)[to.x][to.y];
+        revert_list_.push_back(std::tuple(from.x, from.y, piece_from->GetColor()));
+        revert_list_.push_back(std::tuple(to.x, to.y, pitce_to->GetColor()));
+        piece_from->SetColor(PieceColor::NONE);
+        pitce_to->SetColor(move.player);
+    }
+
+    void RevertMove() {
+        Pop();
+        Pop();
     }
 };
 
@@ -406,3 +470,5 @@ class SurakartaMovablityUtil {
         return IsMovableToNoneCapture(piece, piece_to) || IsMovableToCapture(piece, piece_to);
     }
 };
+
+#endif  // SURAKARTA_UTILS_H
