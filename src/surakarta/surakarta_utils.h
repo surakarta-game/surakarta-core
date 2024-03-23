@@ -19,14 +19,21 @@ enum class SurakartaDirection {
     DOWN_LEFT = 8,
 };
 
-const SurakartaDirectionStraight SurakartaDirectionStraightList[] = {
+// const SurakartaDirectionStraight SurakartaDirectionStraightList[];
+// const SurakartaDirection SurakartaDirectionList[];
+// const SurakartaDirection SurakartaDirectionNotStraightList[];
+
+// std::pair<int, int> operator+(SurakartaPosition position, SurakartaDirectionStraight direction);
+// std::pair<int, int> operator+(SurakartaPosition position, SurakartaDirection direction);
+
+inline const SurakartaDirectionStraight SurakartaDirectionStraightList[] = {
     SurakartaDirectionStraight::UP,
     SurakartaDirectionStraight::DOWN,
     SurakartaDirectionStraight::LEFT,
     SurakartaDirectionStraight::RIGHT,
 };
 
-const SurakartaDirection SurakartaDirectionList[] = {
+inline const SurakartaDirection SurakartaDirectionList[] = {
     SurakartaDirection::UP,
     SurakartaDirection::DOWN,
     SurakartaDirection::LEFT,
@@ -37,14 +44,14 @@ const SurakartaDirection SurakartaDirectionList[] = {
     SurakartaDirection::DOWN_LEFT,
 };
 
-const SurakartaDirection SurakartaDirectionNotStraightList[] = {
+inline const SurakartaDirection SurakartaDirectionNotStraightList[] = {
     SurakartaDirection::UP_RIGHT,
     SurakartaDirection::UP_LEFT,
     SurakartaDirection::DOWN_RIGHT,
     SurakartaDirection::DOWN_LEFT,
 };
 
-std::pair<int, int> operator+(SurakartaPosition position, SurakartaDirectionStraight direction) {
+inline std::pair<int, int> operator+(SurakartaPosition position, SurakartaDirectionStraight direction) {
     return direction == SurakartaDirectionStraight::UP
                ? std::pair(position.x, position.y - 1)
            : direction == SurakartaDirectionStraight::DOWN
@@ -56,7 +63,7 @@ std::pair<int, int> operator+(SurakartaPosition position, SurakartaDirectionStra
                : throw new std::logic_error("Invalid direction");
 }
 
-std::pair<int, int> operator+(SurakartaPosition position, SurakartaDirection direction) {
+inline std::pair<int, int> operator+(SurakartaPosition position, SurakartaDirection direction) {
     return direction == SurakartaDirection::UP
                ? std::pair(position.x, position.y - 1)
            : direction == SurakartaDirection::DOWN
@@ -170,74 +177,232 @@ inline std::ostream& operator<<(std::ostream& os, const SurakartaDirection& dir)
     return os;
 }
 
-// class SurakartaPieceMovableUtil {
-//    private:
-//     const std::shared_ptr<const SurakartaBoard> board_;
-//     const SurakartaPieceMoveUtil util_;
+class SurakartaPieceMovableUtil {
+   private:
+    const std::shared_ptr<const SurakartaBoard> board_;
+    const SurakartaPieceMoveUtil util_;
 
-//    public:
-//     SurakartaPieceMovableUtil(std::shared_ptr<const SurakartaBoard> board)
-//         : board_(board), util_(board->board_size_) {}
+   public:
+    SurakartaPieceMovableUtil(std::shared_ptr<const SurakartaBoard> board)
+        : board_(board), util_(board->board_size_) {}
 
-//     bool IsMovable(const SurakartaPiece& piece) const {
-//         const auto position = piece.GetPosition();
-//         for (const auto direction : SurakartaDirectionStraightList) {
-//             const auto pair_opt = util_.Next(std::pair(position, direction));
-//             if (pair_opt.has_value()) {
-//                 const auto position = pair_opt.value().first;
-//                 if ((*board_)[position.x][position.y]->GetColor() == PieceColor::NONE)
-//                     return true;
-//             }
-//         }
-//         for (const auto direction : SurakartaDirectionNotStraightList) {
-//             const auto next_position = position + direction;
-//             if (board_->IsInside(SurakartaPosition(next_position.first, next_position.second)))
-//                 if ((*board_)[next_position.first][next_position.second]->GetColor() == PieceColor::NONE)
-//                     return true;
-//         }
-//         return false;
-//     }
-// };
+    bool IsMovable(const SurakartaPiece& piece) const {
+        const auto position = piece.GetPosition();
+        for (const auto direction : SurakartaDirectionStraightList) {
+            const auto pair_opt = util_.Next(std::pair(position, direction));
+            if (pair_opt.has_value()) {
+                const auto position = pair_opt.value().first;
+                if ((*board_)[position.x][position.y]->GetColor() == PieceColor::NONE)
+                    return true;
+            }
+        }
+        for (const auto direction : SurakartaDirectionNotStraightList) {
+            const auto next_position = position + direction;
+            if (board_->IsInside(SurakartaPosition(next_position.first, next_position.second)))
+                if ((*board_)[next_position.first][next_position.second]->GetColor() == PieceColor::NONE)
+                    return true;
+        }
+        return false;
+    }
+};
 
-// class SurakartaPieceCanCaptureUtil {
-//    private:
-//     const std::shared_ptr<const SurakartaBoard> board_;
-//     const SurakartaPieceMoveUtil util_;
+class SurakartaPieceCanCaptureUtil {
+   private:
+    const std::shared_ptr<const SurakartaBoard> board_;
+    const SurakartaPieceMoveUtil util_;
 
-//    public:
-//     SurakartaPieceCanCaptureUtil(std::shared_ptr<const SurakartaBoard> board)
-//         : board_(board), util_(board->board_size_) {}
+   public:
+    SurakartaPieceCanCaptureUtil(std::shared_ptr<const SurakartaBoard> board)
+        : board_(board), util_(board->board_size_) {}
 
-//     bool CanCaptureOpponentPiece(const SurakartaPiece& piece) const {
-//         const auto curr_colour = piece.GetColor();
-//         const auto oppo_colour = ReverseColor(curr_colour);
-//         const auto position = piece.GetPosition();
-//         for (const auto start_direction : SurakartaDirectionStraightList) {
-//             auto curr_position = position;
-//             auto curr_direction = start_direction;
-//             int passed_corner_cnt = 0;
-//             while (true) {
-//                 const auto next_pair_opt = util_.Next(std::pair(curr_position, curr_direction));  // Try move a step
-//                 if (next_pair_opt.has_value() == false)                                           // At corner
-//                     break;
-//                 auto [next_position, next_direction] = next_pair_opt.value();
-//                 curr_position = next_position;
-//                 if (next_direction != curr_direction)  // Has gone through a quarter
-//                     passed_corner_cnt++;
-//                 curr_direction = next_direction;
-//                 if ((*board_)[curr_position.x][curr_position.y]->GetColor() == oppo_colour) {  // Reached
-//                     if (passed_corner_cnt > 0)
-//                         return true;
-//                     else
-//                         break;  // Must pass a corner before capture
-//                 }
-//                 // Encountered another piece (not self):
-//                 if (curr_position != position && (*board_)[curr_position.x][curr_position.y]->GetColor() != PieceColor::NONE)
-//                     break;
-//                 if (curr_position == position && passed_corner_cnt == 4)  // Has gone back
-//                     break;
-//             }
-//         }
-//         return false;
-//     }
-// };
+    bool CanCaptureOpponentPiece(const SurakartaPiece& piece) const {
+        const auto curr_colour = piece.GetColor();
+        const auto oppo_colour = ReverseColor(curr_colour);
+        const auto position = piece.GetPosition();
+        for (const auto start_direction : SurakartaDirectionStraightList) {
+            auto curr_position = position;
+            auto curr_direction = start_direction;
+            int passed_corner_cnt = 0;
+            while (true) {
+                const auto next_pair_opt = util_.Next(std::pair(curr_position, curr_direction));  // Try move a step
+                if (next_pair_opt.has_value() == false)                                           // At corner
+                    break;
+                auto [next_position, next_direction] = next_pair_opt.value();
+                curr_position = next_position;
+                if (next_direction != curr_direction)  // Has gone through a quarter
+                    passed_corner_cnt++;
+                curr_direction = next_direction;
+                if ((*board_)[curr_position.x][curr_position.y]->GetColor() == oppo_colour) {  // Reached
+                    if (passed_corner_cnt > 0)
+                        return true;
+                    else
+                        break;  // Must pass a corner before capture
+                }
+                // Encountered another piece (not self):
+                if (curr_position != position && (*board_)[curr_position.x][curr_position.y]->GetColor() != PieceColor::NONE)
+                    break;
+                if (curr_position == position && passed_corner_cnt == 4)  // Has gone back
+                    break;
+            }
+        }
+        return false;
+    }
+
+    bool CanCaptureOpponentPiece(PieceColor colour) const {
+        for (const auto& column : *board_) {
+            for (const auto& piece : column) {
+                if (piece->GetColor() == colour && CanCaptureOpponentPiece(*piece))
+                    return true;
+            }
+        }
+    }
+};
+
+class SurakartaGetAllLegalTargetUtil {
+   private:
+    const unsigned int board_size_;
+    const std::shared_ptr<const SurakartaBoard> board_;
+    const SurakartaPieceMoveUtil util_;
+
+   public:
+    SurakartaGetAllLegalTargetUtil(std::shared_ptr<const SurakartaBoard> board)
+        : board_size_(board->board_size_), board_(board), util_(board->board_size_) {}
+
+    std::unique_ptr<std::vector<SurakartaPosition>> GetAllLegalTarget(const SurakartaPiece& piece) const {
+        const auto position = piece.GetPosition();
+        const auto curr_colour = piece.GetColor();
+        const auto oppo_colour = ReverseColor(curr_colour);
+        const auto result_map = std::make_unique<std::vector<bool>>(board_size_ * board_size_, false);
+        for (const auto direction : SurakartaDirectionList) {
+            const auto next_position = position + direction;
+            if (board_->IsInside(SurakartaPosition(next_position.first, next_position.second)))
+                if ((*board_)[next_position.first][next_position.second]->GetColor() == PieceColor::NONE)
+                    result_map->at(next_position.first * board_size_ + next_position.second) = true;
+        }
+        for (const auto start_direction : SurakartaDirectionStraightList) {
+            auto curr_position = position;
+            auto curr_direction = start_direction;
+            int passed_corner_cnt = 0;
+            while (true) {
+                const auto next_pair_opt = util_.Next(std::pair(curr_position, curr_direction));  // Try move a step
+                if (next_pair_opt.has_value() == false)                                           // At corner
+                    break;
+                auto [next_position, next_direction] = next_pair_opt.value();
+                curr_position = next_position;
+                if (next_direction != curr_direction)  // Has gone through a quarter
+                    passed_corner_cnt++;
+                curr_direction = next_direction;
+                const auto curr_position_colour = (*board_)[curr_position.x][curr_position.y]->GetColor();
+                // Encountered another piece (not self):
+                if (curr_position != position && curr_position_colour != PieceColor::NONE) {
+                    if (curr_position_colour == oppo_colour && passed_corner_cnt > 0) {
+                        result_map->at(curr_position.x * board_size_ + curr_position.y) = true;
+                    }
+                    break;
+                }
+                if (curr_position == position && passed_corner_cnt == 4)  // Has gone back
+                    break;
+            }
+        }
+        auto result = std::make_unique<std::vector<SurakartaPosition>>();
+        for (unsigned int i = 0; i < board_size_; i++) {
+            for (unsigned int j = 0; j < board_size_; j++) {
+                if (result_map->at(i * board_size_ + j))
+                    result->push_back(SurakartaPosition(i, j));
+            }
+        }
+        return result;
+    }
+};
+
+class SurakartaApplyMoveFunctionallyUtil {
+   private:
+    const std::shared_ptr<const SurakartaBoard> board_;
+
+   public:
+    SurakartaApplyMoveFunctionallyUtil(std::shared_ptr<const SurakartaBoard> board)
+        : board_(board) {}
+
+    std::unique_ptr<SurakartaBoard> ApplyMoveFunctionally(const SurakartaMove& move) const {
+        auto new_board = std::make_unique<SurakartaBoard>(board_->board_size_);
+        for (unsigned int i = 0; i < board_->board_size_; i++) {
+            for (unsigned int j = 0; j < board_->board_size_; j++) {
+                (*new_board)[i][j] = (*board_)[i][j];
+            }
+        }
+        const auto from = move.from;
+        const auto to = move.to;
+        const auto piece = (*new_board)[from.x][from.y];
+        (*new_board)[from.x][from.y] = std::make_shared<SurakartaPiece>(from, PieceColor::NONE);
+        (*new_board)[to.x][to.y] = piece;
+        return new_board;
+    }
+};
+
+class SurakartaMovablityUtil {
+   private:
+    const std::shared_ptr<const SurakartaBoard> board_;
+    const SurakartaPieceMoveUtil util_;
+
+   public:
+    SurakartaMovablityUtil(std::shared_ptr<const SurakartaBoard> board)
+        : board_(board), util_(board->board_size_) {}
+
+    bool IsMovableToNoneCapture(const SurakartaPiece& piece, const SurakartaPiece& piece_to) const {
+        if (piece.GetColor() == PieceColor::NONE || piece_to.GetColor() != PieceColor::NONE)
+            return false;
+        const auto position = piece.GetPosition();
+        const auto position_to = piece_to.GetPosition();
+        for (const auto direction : SurakartaDirectionList) {
+            const auto next = position + direction;
+            const auto next_pos = SurakartaPosition(next.first, next.second);
+            if (board_->IsInside(next_pos) == false)
+                continue;
+            if ((*board_)[next_pos.x][next_pos.y]->GetColor() != PieceColor::NONE)
+                continue;
+            if (next_pos == position_to)
+                return true;
+        }
+        return false;
+    }
+
+    bool IsMovableToCapture(const SurakartaPiece& piece, const SurakartaPiece& piece_to) const {
+        if (piece.GetColor() == PieceColor::NONE || piece_to.GetColor() == PieceColor::NONE)
+            return false;
+        if (piece.GetColor() == piece_to.GetColor())
+            return false;
+        const auto position = piece.GetPosition();
+        const auto position_to = piece_to.GetPosition();
+        for (const auto start_direction : SurakartaDirectionStraightList) {
+            auto curr_position = position;
+            auto curr_direction = start_direction;
+            int passed_corner_cnt = 0;
+            while (true) {
+                const auto next_pair_opt = util_.Next(std::pair(curr_position, curr_direction));  // Try move a step
+                if (next_pair_opt.has_value() == false)                                           // At corner
+                    break;
+                auto [next_position, next_direction] = next_pair_opt.value();
+                curr_position = next_position;
+                if (next_direction != curr_direction)  // Has gone through a quarter
+                    passed_corner_cnt++;
+                curr_direction = next_direction;
+                if (curr_position == position_to) {  // Reached
+                    if (passed_corner_cnt > 0)
+                        return true;
+                    else
+                        break;  // Must pass a corner before capture
+                }
+                // Encountered another piece (not self):
+                if (curr_position != position && (*board_)[curr_position.x][curr_position.y]->GetColor() != PieceColor::NONE)
+                    break;
+                if (curr_position == position && passed_corner_cnt == 4)  // Has gone back
+                    break;
+            }
+        }
+        return false;
+    }
+
+    bool IsMovableTo(const SurakartaPiece& piece, const SurakartaPiece& piece_to) const {
+        return IsMovableToNoneCapture(piece, piece_to) || IsMovableToCapture(piece, piece_to);
+    }
+};
