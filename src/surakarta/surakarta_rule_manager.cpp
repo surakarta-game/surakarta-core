@@ -25,6 +25,8 @@ SurakartaIllegalMoveReason SurakartaRuleManager::JudgeMove(const SurakartaMove& 
     // Ensure color is correct:
     if (color_from == PieceColor::NONE)
         return SurakartaIllegalMoveReason::NOT_PIECE;
+    if (move.player != curr_player)
+        return SurakartaIllegalMoveReason::NOT_PLAYER_TURN;
     if (color_from != curr_player)
         return SurakartaIllegalMoveReason::NOT_PLAYER_PIECE;
     if (color_to != oppo_player && color_to != PieceColor::NONE) {
@@ -36,49 +38,17 @@ SurakartaIllegalMoveReason SurakartaRuleManager::JudgeMove(const SurakartaMove& 
     if (move.player != game_info_->current_player_)
         return SurakartaIllegalMoveReason::NOT_PLAYER_TURN;
 
+    const auto util = SurakartaMovablityUtil(board_);
     if (piece_to->GetColor() == PieceColor::NONE) {  // Non-capture case:
-        // Try to reach move.to from eight directions:
-        for (const auto direction : SurakartaDirectionList) {
-            const auto next = move.from + direction;
-            const auto next_pos = SurakartaPosition(next.first, next.second);
-            if (board_->IsInside(next_pos) == false)
-                continue;
-            if ((*board_)[next_pos.x][next_pos.y]->GetColor() != PieceColor::NONE)
-                continue;
-            if (next_pos == move.to)
-                return SurakartaIllegalMoveReason::LEGAL_NON_CAPTURE_MOVE;
-        }
-        // Can't reach move.to from eight directions:
-        return SurakartaIllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE;
+        if (util.IsMovableToNoneCapture(*piece_from, *piece_to))
+            return SurakartaIllegalMoveReason::LEGAL_NON_CAPTURE_MOVE;
+        else
+            return SurakartaIllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE;
     } else {  // Capture case:
-        const auto util = SurakartaPieceMoveUtil(board_size_);
-        for (const auto start_direction : SurakartaDirectionStraightList) {
-            auto curr_position = move.from;
-            auto curr_direction = start_direction;
-            int passed_corner_cnt = 0;
-            while (true) {
-                const auto next_pair_opt = util.Next(std::pair(curr_position, curr_direction));  // Try move a step
-                if (next_pair_opt.has_value() == false)                                          // At corner
-                    break;
-                auto [next_position, next_direction] = next_pair_opt.value();
-                curr_position = next_position;
-                if (next_direction != curr_direction)  // Has gone through a quarter
-                    passed_corner_cnt++;
-                curr_direction = next_direction;
-                if (curr_position == move.to) {  // Reached
-                    if (passed_corner_cnt > 0)
-                        return SurakartaIllegalMoveReason::LEGAL_CAPTURE_MOVE;
-                    else
-                        break;  // Must pass a corner before capture
-                }
-                // Encountered another piece (not self):
-                if (curr_position != move.from && (*board_)[curr_position.x][curr_position.y]->GetColor() != PieceColor::NONE)
-                    break;
-                if (curr_position == move.from && passed_corner_cnt == 4)  // Has gone back
-                    break;
-            }
-        }
-        return SurakartaIllegalMoveReason::ILLIGAL_CAPTURE_MOVE;
+        if (util.IsMovableToCapture(*piece_from, *piece_to))
+            return SurakartaIllegalMoveReason::LEGAL_CAPTURE_MOVE;
+        else
+            return SurakartaIllegalMoveReason::ILLIGAL_CAPTURE_MOVE;
     }
 }
 
@@ -123,9 +93,13 @@ std::pair<SurakartaEndReason, SurakartaPlayer> SurakartaRuleManager::JudgeEnd(co
 }
 
 std::unique_ptr<std::vector<SurakartaPosition>> SurakartaRuleManager::GetAllLegalTarget(const SurakartaPosition postion) {
-    // TODO:
-    // We don't test this function, you don't need to implement this function if you don't need it.
-    return std::make_unique<std::vector<SurakartaPosition>>();
+    if (board_->IsInside(postion) == false || board_->IsInside(postion) == false)
+        return std::make_unique<std::vector<SurakartaPosition>>();
+    if ((*board_)[postion.x][postion.y]->GetColor() == PieceColor::NONE)
+        return std::make_unique<std::vector<SurakartaPosition>>();
+    const auto piece_ptr = (*board_)[postion.x][postion.y];
+    const auto util = SurakartaGetAllLegalTargetUtil(board_);
+    return util.GetAllLegalTarget(*piece_ptr);
 }
 
 void SurakartaRuleManager::HelloWorld() {

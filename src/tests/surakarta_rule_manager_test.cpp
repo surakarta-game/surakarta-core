@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include "surakarta/surakarta_common.h"
 #include "surakarta/surakarta_game.h"
+#include "surakarta/surakarta_utils.h"
 #include "surakarta_ta/surakarta_rule_manager_imp.h"
 
 #ifndef TEST_DATA_DIR
@@ -86,6 +87,101 @@ TEST(SurakartaRuleManagerTest, MoveReasonTest) {
                                                        << *game2.GetBoard() << "GameInfo:" << std::endl
                                                        << *game2.GetGameInfo() << "Move: " << move << std::endl;
         }
+    }
+}
+
+// modified from TEST(SurakartaRuleManagerTest, RandomTest)
+TEST(SurakartaRuleManagerTest, LegalTargetTest) {
+    int offline_test_round;
+    int num_game;
+    int log_level;
+    /*
+    0: no log
+    1: log total moves
+    2: log pass
+    */
+    const char* offline_test_round_str = std::getenv("OFFLINE_TEST_ROUND");
+    const char* log_level_str = std::getenv("LOG_LEVEL");
+    offline_test_round = offline_test_round_str ? std::stoi(offline_test_round_str) : 100;
+    num_game = 100;
+    log_level = log_level_str ? std::stoi(log_level_str) : 2;
+
+    SurakartaGame game1;
+    SurakartaGame game2;
+    std::shared_ptr<SurakartaRuleManagerImp> rule_manager_ta = std::make_shared<SurakartaRuleManagerImp>(game2.GetBoard(), game2.GetGameInfo());
+    auto rule_manager_stu = game1.GetRuleManager();
+    game2.SetRuleManager(rule_manager_ta);
+    game1.StartGame();
+    game2.StartGame();
+    int game_cnt = 0;
+    int move_cnt = 0;
+    while (true) {
+        SurakartaMove move;
+        for (int i = 0; i < offline_test_round + 1; i++) {
+            if (i == offline_test_round) {
+                move = rule_manager_ta->GenerateMove(0, 1);
+            } else {
+                move = rule_manager_ta->GenerateMove(0.5, 0.5);
+            }
+            auto move_reason_ta = rule_manager_ta->JudgeMove(move);
+            auto [end_reason_ta, winner_ta] = rule_manager_ta->JudgeEnd(move_reason_ta);
+            auto move_reason_stu = rule_manager_stu->JudgeMove(move);
+            auto [end_reason_stu, winner_stu] = rule_manager_stu->JudgeEnd(move_reason_stu);
+            ASSERT_EQ(move_reason_ta, move_reason_stu) << "Board:" << std::endl
+                                                       << *game2.GetBoard() << "GameInfo:" << std::endl
+                                                       << *game2.GetGameInfo() << "Move: " << move << std::endl;
+            ASSERT_EQ(end_reason_ta, end_reason_stu) << "Board:" << std::endl
+                                                     << *game2.GetBoard() << "GameInfo:" << std::endl
+                                                     << *game2.GetGameInfo() << "Move: " << move << std::endl;
+            ASSERT_EQ(winner_ta, winner_stu) << "Board:" << std::endl
+                                             << *game2.GetBoard() << "GameInfo:" << std::endl
+                                             << *game2.GetGameInfo() << "Move: " << move << std::endl;
+
+            // Test added by nictheboy:
+            const auto board = game2.GetBoard();
+
+            const auto util = SurakartaMovablityUtil(board);
+            const auto util2 = SurakartaGetAllLegalTargetUtil(board);
+            for (unsigned int x = 0; x < BOARD_SIZE; x++) {
+                for (unsigned int y = 0; y < BOARD_SIZE; y++) {
+                    const auto piece = (*board)[x][y];
+                    if (piece->GetColor() != PieceColor::NONE) {
+                        const auto list = util2.GetAllLegalTarget(*piece);
+                        auto map = std::vector<bool>(BOARD_SIZE * BOARD_SIZE, false);
+                        for (unsigned int x_to = 0; x_to < BOARD_SIZE; x_to++) {
+                            for (unsigned int y_to = 0; y_to < BOARD_SIZE; y_to++) {
+                                const auto piece_to = (*board)[x_to][y_to];
+                                const auto movability1 = util.IsMovableTo(*piece, *piece_to);
+                                const auto movability2 = std::find(list->begin(), list->end(), SurakartaPosition(x_to, y_to)) != list->end();
+                                const auto move = SurakartaMove(x, y, x_to, y_to, piece->GetColor());
+                                ASSERT_EQ(movability1, movability2) << "Board:" << std::endl
+                                                                    << *game2.GetBoard() << "GameInfo:" << std::endl
+                                                                    << *game2.GetGameInfo() << "Move: " << move << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        game1.Move(move);
+        game2.Move(move);
+        if (game2.IsEnd()) {
+            if (log_level >= 2) {
+                std::cout << "Game " << game_cnt << " (" << game2.GetGameInfo()->num_round_ << " round)"
+                          << " (" << game2.GetGameInfo()->end_reason_ << ") "
+                          << " passed." << std::endl;
+            }
+            move_cnt += game2.GetGameInfo()->num_round_ * (offline_test_round + 1);
+            game1.StartGame();
+            game2.StartGame();
+            game_cnt++;
+            if (game_cnt >= num_game) {
+                break;
+            }
+        }
+    }
+    if (log_level >= 1) {
+        std::cout << "Passed " << move_cnt << " moves." << std::endl;
     }
 }
 
