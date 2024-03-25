@@ -1,18 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
-
-project(libsurakarta-test)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
 add_subdirectory(../third-party/googletest ${CMAKE_BINARY_DIR}/third-party/googletest)
-
-# add_compile_options(-fsanitize=address)
-# add_compile_options(-g)
-# add_link_options(-fsanitize=address)
-
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS "-Ofast")
 
 get_filename_component(TEST_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" ABSOLUTE)
 add_definitions(-DTEST_DATA_DIR="${TEST_SOURCE_DIR}/test_data/")

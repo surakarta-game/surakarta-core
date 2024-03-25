@@ -1,8 +1,7 @@
-#ifndef SURAKARTA_AGENT_MINE_H
-#define SURAKARTA_AGENT_MINE_H
+#pragma once
 
 #include <memory>
-#include "../surakarta_utils.h"
+#include "surakarta_utils.h"
 #include "surakarta_agent_base.h"
 
 class SurakartaMoveWeightUtilBase {
@@ -70,5 +69,3 @@ class SurakartaAgentMine : public SurakartaAgentBase {
           move_weight_util_(move_weight_util) {}
     SurakartaMove CalculateMove() override;
 };
-
-#endif  // SURAKARTA_AGENT_MINE_H

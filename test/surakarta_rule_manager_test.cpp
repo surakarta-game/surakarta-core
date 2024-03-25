@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <iostream>
-#include "../src/surakarta_common.h"
-#include "../src/surakarta_game.h"
-#include "../src/surakarta_utils.h"
+#include "surakarta_common.h"
+#include "surakarta_game.h"
+#include "surakarta_utils.h"
 #include "gtest/gtest.h"
 #include "surakarta_rule_manager_imp.h"
 

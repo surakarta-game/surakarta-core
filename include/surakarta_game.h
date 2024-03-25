@@ -1,6 +1,6 @@
 #pragma once
 
-#include "surakarta_agent/surakarta_agent_base.h"
+#include "surakarta_agent_base.h"
 #include "surakarta_common.h"
 #include "surakarta_rule_manager_impl.h"
 
@@ -44,8 +44,7 @@ class SurakartaGame {
         : board_size_(board_size),
           board_(std::make_shared<SurakartaBoard>(board_size)),
           game_info_(std::make_shared<SurakartaGameInfo>(max_no_capture_round)),
-          rule_manager_(std::make_shared<SurakartaRuleManagerImpl>(board_, game_info_)),
-          agent_(std::make_shared<SurakartaAgentBase>(board_, game_info_, rule_manager_)) {}
+          rule_manager_(std::make_shared<SurakartaRuleManagerImpl>(board_, game_info_)) {}
 
     /**
      * @brief Start the game. If file_name is empty, the board will be initialized to the initial state. Otherwise, the board will be initialized to the state in the file.
@@ -71,15 +70,10 @@ class SurakartaGame {
      */
     SurakartaMoveResponse Move(const SurakartaMove& move);
 
-    /**
-     * @brief Set the agent.
-     */
-    void SetAgent(std::shared_ptr<SurakartaAgentBase> agent) { agent_ = agent; }
-
     unsigned int GetBoardSize() const { return board_size_; }
     std::shared_ptr<SurakartaBoard> GetBoard() const { return board_; }
     std::shared_ptr<SurakartaGameInfo> GetGameInfo() const { return game_info_; }
-    std::shared_ptr<SurakartaAgentBase> GetAgent() const { return agent_; }
+    // std::shared_ptr<SurakartaAgentBase> GetAgent() const { return agent_; }
     bool IsEnd() const { return game_info_->IsEnd(); }
 
     void SetRuleManager(std::shared_ptr<SurakartaRuleManager> rule_manager) {  // For testing.
@@ -92,5 +86,4 @@ class SurakartaGame {
     std::shared_ptr<SurakartaBoard> board_;
     std::shared_ptr<SurakartaGameInfo> game_info_;
     std::shared_ptr<SurakartaRuleManager> rule_manager_;
-    std::shared_ptr<SurakartaAgentBase> agent_;
 };

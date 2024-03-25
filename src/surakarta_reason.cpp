@@ -1,5 +1,4 @@
 #include "surakarta_reason.h"
-#include <iostream>
 
 bool IsLegalMoveReason(SurakartaIllegalMoveReason reason) {
     switch (reason) {

@@ -1,5 +1,4 @@
 #include "surakarta_rule_manager_impl.h"
-#include <iostream>
 #include "surakarta_utils.h"
 
 void SurakartaRuleManagerImpl::OnUpdateBoard() {

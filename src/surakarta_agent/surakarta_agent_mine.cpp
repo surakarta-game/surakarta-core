@@ -1,5 +1,4 @@
-#include "surakarta_agent_mine.h"
-
+#include "surakarta.h"
 #include <algorithm>
 #include <valarray>
 

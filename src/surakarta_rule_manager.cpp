@@ -1,7 +1,5 @@
 #include "surakarta_rule_manager.h"
 #include <exception>
-#include <iostream>
-#include "surakarta_utils.h"
 
 void SurakartaRuleManager::OnUpdateBoard() {
     throw std::runtime_error("Method not implemented");

@@ -1,6 +1,5 @@
 #include "surakarta_game.h"
 #include <fstream>
-#include <iostream>
 
 void SurakartaGame::StartGame(std::string file_name) {
     if (file_name.empty()) {

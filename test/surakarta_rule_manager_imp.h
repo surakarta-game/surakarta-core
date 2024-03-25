@@ -3,7 +3,7 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
-#include "../src/surakarta_rule_manager.h"
+#include "surakarta_rule_manager.h"
 
 class SurakartaRuleManagerImp : public SurakartaRuleManager {
     using SurakartaRuleManager::board_;

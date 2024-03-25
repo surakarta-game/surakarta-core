@@ -1,10 +1,6 @@
 #include "surakarta_agent_random.h"
+#include "global_random_generator.h"
 #include <algorithm>
-#include <cstdlib>
-#include <random>
-#include <vector>
-#include "../global_random_generator.h"
-#include "../surakarta_common.h"
 
 SurakartaMove SurakartaAgentRandom::CalculateMove() {
     std::vector<SurakartaPosition> from;

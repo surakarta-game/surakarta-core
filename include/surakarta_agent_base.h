@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "../surakarta_common.h"
-#include "../surakarta_rule_manager.h"
+#include "surakarta_common.h"
+#include "surakarta_rule_manager.h"
 
 class SurakartaAgentBase {
    public:
@@ -16,13 +16,7 @@ class SurakartaAgentBase {
 
     virtual ~SurakartaAgentBase() = default;
 
-    virtual SurakartaMove CalculateMove() {
-        throw SurakartaException("SurakartaAgentBase::CalculateMove() is not implemented. Are you using SurakartaAgentBase directly?");
-    }
-
-    void SetRuleManager(std::shared_ptr<SurakartaRuleManager> rule_manager) {  // For testing
-        rule_manager_ = rule_manager;
-    }
+    virtual SurakartaMove CalculateMove() = 0;
 
    protected:
     unsigned int board_size_;
