@@ -2,6 +2,9 @@
 #define SURAKARTA_AGENT_MINE_H
 
 #include <memory>
+#include <random>
+
+#include "surakarta/global_random_generator.h"
 #include "surakarta/surakarta_agent/surakarta_agent_base.h"
 #include "surakarta/surakarta_utils.h"
 
@@ -57,6 +60,7 @@ class SurakartaAgentMine : public SurakartaAgentBase {
     const PieceColor curr_colour_;
     const SurakartaGetAllLegalMovesUtil get_all_legal_moves_util_;
     const std::shared_ptr<SurakartaMoveWeightUtilBase> move_weight_util_;
+    std::mt19937 random_engine_;
 
    public:
     SurakartaAgentMine(std::shared_ptr<SurakartaBoard> board,
@@ -67,7 +71,8 @@ class SurakartaAgentMine : public SurakartaAgentBase {
         : SurakartaAgentBase(board, game_info, rule_manager),
           curr_colour_(curr_colour),
           get_all_legal_moves_util_(board),
-          move_weight_util_(move_weight_util) {}
+          move_weight_util_(move_weight_util),
+          random_engine_(GlobalRandomGenerator::getInstance()) {}
     SurakartaMove CalculateMove() override;
 };
 
