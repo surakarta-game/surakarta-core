@@ -2,7 +2,7 @@
 
 #include "surakarta_agent/surakarta_agent_base.h"
 #include "surakarta_common.h"
-#include "surakarta_rule_manager.h"
+#include "surakarta_rule_manager_impl.h"
 
 class SurakartaMoveResponse {
    public:
@@ -44,7 +44,7 @@ class SurakartaGame {
         : board_size_(board_size),
           board_(std::make_shared<SurakartaBoard>(board_size)),
           game_info_(std::make_shared<SurakartaGameInfo>(max_no_capture_round)),
-          rule_manager_(std::make_shared<SurakartaRuleManager>(board_, game_info_)),
+          rule_manager_(std::make_shared<SurakartaRuleManagerImpl>(board_, game_info_)),
           agent_(std::make_shared<SurakartaAgentBase>(board_, game_info_, rule_manager_)) {}
 
     /**

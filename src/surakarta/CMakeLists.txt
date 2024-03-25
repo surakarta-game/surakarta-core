@@ -1,4 +1,4 @@
-SET(GAME_SOURCES surakarta_reason.cpp surakarta_game.cpp surakarta_rule_manager.cpp)
+SET(GAME_SOURCES surakarta_reason.cpp surakarta_game.cpp surakarta_rule_manager.cpp surakarta_rule_manager_impl.cpp)
 SET(AGENT_SOURCES surakarta_agent/surakarta_agent_random.cpp surakarta_agent/surakarta_agent_mine.cpp)
 
 add_library(surakarta ${GAME_SOURCES} ${AGENT_SOURCES})

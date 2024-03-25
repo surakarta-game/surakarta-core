@@ -1,5 +1,12 @@
 add_executable(main_ta main.cpp)
 
+# When using clang, -Wdelete-non-abstract-non-virtual-dtor is given.
+# This is completely necessary, but SurakartaRuleManagerImp is close source, so it is not possible to fix it.
+# Therefore, this warning is disabled.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(main_ta PRIVATE -Wno-delete-non-abstract-non-virtual-dtor)
+endif()
+
 if(ENV STREQUAL "DEV")
     add_library(surakarta_ta_lib SHARED surakarta_rule_manager_imp.h surakarta_rule_manager_imp.cpp)
     target_link_libraries(surakarta_ta_lib surakarta)

@@ -16,8 +16,10 @@ jobs:
     - name: Setup GoogleTest
       uses: Bacondish2023/setup-googletest@v1.0.1
 
-    - name: Configure and Build
+    - name: Configure and Build with GCC
       run: |
+        export CC=/usr/bin/gcc
+        export CXX=/usr/bin/g++
         mkdir build
         cd build
         cmake ..
@@ -26,8 +28,19 @@ jobs:
     - name: Run Tests
       run: |
         export LOG_LEVEL=1
-        if [ "${{ github.repository }}" == "panjd123/Surakarta-RuleAiTest" ]; then
-          echo "Tests skipped for TA's repository"
-        else
-          ./build/bin/surakarta_rule_manager_test
-        fi
+        ./build/bin/surakarta_rule_manager_test
+
+    - name: Configure and Build with Clang
+      run: |
+        rm -rf build
+        export CC=/usr/bin/clang
+        export CXX=/usr/bin/clang++
+        mkdir build
+        cd build
+        cmake ..
+        make -j
+  
+    - name: Run Tests
+      run: |
+        export LOG_LEVEL=1
+        ./build/bin/surakarta_rule_manager_test

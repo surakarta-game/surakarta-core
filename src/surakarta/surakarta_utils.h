@@ -260,6 +260,7 @@ class SurakartaPieceCanCaptureUtil {
                     return true;
             }
         }
+        return false;
     }
 };
 

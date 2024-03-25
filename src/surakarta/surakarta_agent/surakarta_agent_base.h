@@ -14,6 +14,8 @@ class SurakartaAgentBase {
           game_info_(std::const_pointer_cast<const SurakartaGameInfo>(game_info)),
           rule_manager_(rule_manager) {}
 
+    virtual ~SurakartaAgentBase() = default;
+
     virtual SurakartaMove CalculateMove() {
         throw SurakartaException("SurakartaAgentBase::CalculateMove() is not implemented. Are you using SurakartaAgentBase directly?");
     }
