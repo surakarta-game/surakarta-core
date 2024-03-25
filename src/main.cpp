@@ -3,11 +3,11 @@
 #include <cstring>
 #include <iostream>
 #include <thread>
-#include "surakarta/global_random_generator.h"
-#include "surakarta/surakarta_agent/surakarta_agent_mine.h"
-#include "surakarta/surakarta_agent/surakarta_agent_random.h"
-#include "surakarta/surakarta_common.h"
-#include "surakarta/surakarta_game.h"
+#include "global_random_generator.h"
+#include "surakarta_agent/surakarta_agent_mine.h"
+#include "surakarta_agent/surakarta_agent_random.h"
+#include "surakarta_common.h"
+#include "surakarta_game.h"
 
 #define ANSI_CLEAR_SCREEN "\033[2J"
 #define ANSI_MOVE_TO_START "\033[H"

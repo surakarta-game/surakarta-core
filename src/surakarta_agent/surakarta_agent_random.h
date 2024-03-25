@@ -1,5 +1,5 @@
 #include <memory>
-#include "surakarta/surakarta_agent/surakarta_agent_base.h"
+#include "surakarta_agent_base.h"
 
 class SurakartaAgentRandom : public SurakartaAgentBase {
    public:

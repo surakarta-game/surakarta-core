@@ -1,4 +1,4 @@
-name: Correctness Check Local
+name: Correctness Check
 
 on: [push, pull_request, workflow_dispatch]
 
@@ -9,12 +9,11 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Setup CMake
       uses: jwlawson/actions-setup-cmake@v2.0.1
-
-    - name: Setup GoogleTest
-      uses: Bacondish2023/setup-googletest@v1.0.1
 
     - name: Configure and Build with GCC
       run: |
@@ -28,7 +27,7 @@ jobs:
     - name: Run Tests
       run: |
         export LOG_LEVEL=1
-        ./build/bin/surakarta_rule_manager_test
+        ./build/bin/libsurakarta-test
 
     - name: Configure and Build with Clang
       run: |
@@ -43,4 +42,4 @@ jobs:
     - name: Run Tests
       run: |
         export LOG_LEVEL=1
-        ./build/bin/surakarta_rule_manager_test
+        ./build/bin/libsurakarta-test

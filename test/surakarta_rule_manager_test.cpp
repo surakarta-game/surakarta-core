@@ -1,10 +1,10 @@
 #include <cstdlib>
 #include <iostream>
+#include "../src/surakarta_common.h"
+#include "../src/surakarta_game.h"
+#include "../src/surakarta_utils.h"
 #include "gtest/gtest.h"
-#include "surakarta/surakarta_common.h"
-#include "surakarta/surakarta_game.h"
-#include "surakarta/surakarta_utils.h"
-#include "surakarta_ta/surakarta_rule_manager_imp.h"
+#include "surakarta_rule_manager_imp.h"
 
 #ifndef TEST_DATA_DIR
 #define TEST_DATA_DIR "/home/panjd123/code/TuringSurakarta/src/tests/test_data/"

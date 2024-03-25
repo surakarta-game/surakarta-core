@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "surakarta/surakarta_common.h"
-#include "surakarta/surakarta_rule_manager.h"
+#include "../surakarta_common.h"
+#include "../surakarta_rule_manager.h"
 
 class SurakartaAgentBase {
    public:

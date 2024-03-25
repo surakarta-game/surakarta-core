@@ -2,8 +2,8 @@
 #define SURAKARTA_AGENT_MINE_H
 
 #include <memory>
-#include "surakarta/surakarta_agent/surakarta_agent_base.h"
-#include "surakarta/surakarta_utils.h"
+#include "../surakarta_utils.h"
+#include "surakarta_agent_base.h"
 
 class SurakartaMoveWeightUtilBase {
    protected:

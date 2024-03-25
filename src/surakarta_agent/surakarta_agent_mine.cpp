@@ -1,4 +1,3 @@
-#include "surakarta/surakarta_agent/surakarta_agent_mine.h"
 #include "surakarta_agent_mine.h"
 
 #include <algorithm>
