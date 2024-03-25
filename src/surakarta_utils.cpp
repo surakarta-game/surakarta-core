@@ -121,8 +121,8 @@ bool SurakartaPieceMovableUtil::IsMovable(const SurakartaPiece& piece) const {
     for (const auto direction : SurakartaDirectionStraightList) {
         const auto pair_opt = util_.Next(std::pair(position, direction));
         if (pair_opt.has_value()) {
-            const auto position = pair_opt.value().first;
-            if ((*board_)[position.x][position.y]->GetColor() == PieceColor::NONE)
+            const auto position_next = pair_opt.value().first;
+            if ((*board_)[position_next.x][position_next.y]->GetColor() == PieceColor::NONE)
                 return true;
         }
     }

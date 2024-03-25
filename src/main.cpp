@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
         int cnt_win = 0;
         int cnt_lost = 0;
 
-        std::thread threads[concurrency];
+        const auto threads = std::make_unique<std::thread[]>(concurrency);
         for (int i = 0; i < concurrency; i++) {
             threads[i] = std::thread([&]() {
                 while (true) {
