@@ -101,7 +101,3 @@ std::unique_ptr<std::vector<SurakartaPosition>> SurakartaRuleManagerImpl::GetAll
     const auto util = SurakartaGetAllLegalTargetUtil(board_);
     return util.GetAllLegalTarget(*piece_ptr);
 }
-
-void SurakartaRuleManagerImpl::HelloWorld() {
-    std::cout << "Hello World!" << std::endl;
-}

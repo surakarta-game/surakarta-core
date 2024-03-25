@@ -11,15 +11,9 @@ class SurakartaRuleManagerImpl : public SurakartaRuleManager {
 
     SurakartaRuleManagerImpl(std::shared_ptr<SurakartaBoard> board,
                              std::shared_ptr<SurakartaGameInfo> game_info)
-        : board_size_(board->board_size_),
-          board_(std::const_pointer_cast<const SurakartaBoard>(board)),
-          game_info_(std::const_pointer_cast<const SurakartaGameInfo>(game_info)) {}
+        : SurakartaRuleManager(board, game_info) {}
 
     virtual ~SurakartaRuleManagerImpl() = default;
-
-    unsigned int GetBoardSize() {
-        return board_size_;
-    }
 
     virtual void OnUpdateBoard();
 
@@ -40,20 +34,4 @@ class SurakartaRuleManagerImpl : public SurakartaRuleManager {
      * @param postion The position of the piece.
      */
     virtual std::unique_ptr<std::vector<SurakartaPosition>> GetAllLegalTarget(const SurakartaPosition postion);
-
-    //    protected:
-    unsigned int board_size_;
-    std::shared_ptr<const SurakartaBoard> board_;
-    std::shared_ptr<const SurakartaGameInfo> game_info_;
-
-   public:
-    // TODO:
-    //  define your own functions/variables here
-    void HelloWorld();
-
-    void InlineHelloWorld() {
-        std::cout << "Hello World!" << std::endl;
-    }
-
-    int bye_world_ = 0;
 };
