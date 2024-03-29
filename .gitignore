@@ -1,4 +1,5 @@
 build
+out
 .vscode
-.surakarta_rule_manager_imp.cpp
-surakarta_rule_manager_imp.cpp
+.vs
+CMakeSettings.json
