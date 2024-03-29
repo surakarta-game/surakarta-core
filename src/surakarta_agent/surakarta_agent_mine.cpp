@@ -58,6 +58,13 @@ SurakartaMove SurakartaAgentMine::CalculateMove() {
     std::transform(moves->begin(), moves->end(), std::begin(move_weights), [&](SurakartaMove move) {
         return move_weight_util_->CalculateMoveWeight(move);
     });
-    const auto index = std::max_element(std::begin(move_weights), std::end(move_weights)) - std::begin(move_weights);
-    return moves->at(index);
+    const auto max_weight = move_weights.max();
+    auto max_weight_indexes = std::vector<size_t>();
+    for (size_t i = 0; i < moves->size(); i++) {
+        if (move_weights[i] == max_weight) {
+            max_weight_indexes.push_back(i);
+        }
+    }
+    const auto max_weight_index = max_weight_indexes[random_engine_() % max_weight_indexes.size()];
+    return moves->at(max_weight_index);
 }
