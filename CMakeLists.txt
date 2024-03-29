@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(TuringSurakarta)
+project(libsurakarta)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -8,14 +8,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(INSTALL_DIR ${CMAKE_SOURCE_DIR}/surakarta_ta)
 
 # add_compile_options(-fsanitize=address)
 # add_compile_options(-g)
 # add_link_options(-fsanitize=address)
 
-set(CMAKE_CXX_FLAGS "-O2 -Wall -Wextra")
-set(ENV "TEST" CACHE STRING "DEV or TEST, for students, please use TEST")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")
+endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /w14640")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2")
+endif()
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include) 
 add_subdirectory(src)
-
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_subdirectory(test)
+endif()
