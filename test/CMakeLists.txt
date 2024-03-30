@@ -7,8 +7,10 @@ find_library(SURAKARTA_TA_LIB surakarta_ta_lib ../third-party/panjd123/surakarta
 add_library(surakarta_ta_lib SHARED IMPORTED)
 set_target_properties(surakarta_ta_lib PROPERTIES IMPORTED_LOCATION ${SURAKARTA_TA_LIB})
 
-add_executable(libsurakarta-test surakarta_rule_manager_test.cpp)
-target_link_libraries(libsurakarta-test PRIVATE surakarta surakarta_ta_lib gtest gtest_main)
+if(NOT TARGET libsurakarta-test)
+    add_executable(libsurakarta-test surakarta_rule_manager_test.cpp)
+    target_link_libraries(libsurakarta-test PRIVATE surakarta surakarta_ta_lib gtest gtest_main)
+endif()
 
 # When using clang, -Wdelete-non-abstract-non-virtual-dtor is given.
 # This is completely necessary, but SurakartaRuleManagerImp is close source, so it is not possible to fix it.
