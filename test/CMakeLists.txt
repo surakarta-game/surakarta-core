@@ -3,7 +3,7 @@ add_subdirectory(../third-party/googletest ${CMAKE_BINARY_DIR}/third-party/googl
 get_filename_component(TEST_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" ABSOLUTE)
 add_definitions(-DTEST_DATA_DIR="${TEST_SOURCE_DIR}/test_data/")
 
-find_library(SURAKARTA_TA_LIB surakarta_ta_lib ${CMAKE_SOURCE_DIR}/third-party/panjd123/surakarta_ta/lib)
+find_library(SURAKARTA_TA_LIB surakarta_ta_lib ../third-party/panjd123/surakarta_ta/lib)
 add_library(surakarta_ta_lib SHARED IMPORTED)
 set_target_properties(surakarta_ta_lib PROPERTIES IMPORTED_LOCATION ${SURAKARTA_TA_LIB})
 
