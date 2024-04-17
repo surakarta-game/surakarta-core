@@ -22,17 +22,17 @@ class SurakartaMoveWeightUtil final : public SurakartaMoveWeightUtilBase {
    private:
     SurakartaApplyMoveUtil apply_move_util_;
     const SurakartaGetAllLegalMovesUtil get_all_legal_moves_util_;
-    const unsigned int depth_;
+    const int depth_;
     const double alpha_;
     const double beta_;
 
    public:
-    static constexpr unsigned int DefaultDepth = 4;
+    static constexpr int DefaultDepth = 4;
     static constexpr double DefaultAlpha = 1.1;
     static constexpr double DefaultBeta = 0.9;
     SurakartaMoveWeightUtil(std::shared_ptr<SurakartaBoard> board,
                             PieceColor curr_colour,
-                            unsigned int depth = DefaultDepth,
+                            int depth = DefaultDepth,
                             double alpha = DefaultAlpha,
                             double beta = DefaultBeta)
         : SurakartaMoveWeightUtilBase(board, curr_colour),
@@ -48,7 +48,7 @@ class SurakartaMoveWeightUtil final : public SurakartaMoveWeightUtilBase {
     }
 
     /// @param move The move to calculate the weight, must be valid.
-    double CalculateMoveWeight(SurakartaMove move, unsigned int captured_cnt = 0, int depth = DefaultDepth);
+    double CalculateMoveWeight(SurakartaMove move, int captured_cnt = 0, int depth = DefaultDepth);
 };
 
 class SurakartaAgentMine : public SurakartaAgentBase {

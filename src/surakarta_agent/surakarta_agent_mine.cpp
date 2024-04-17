@@ -1,9 +1,9 @@
-#include "surakarta.h"
 #include <algorithm>
 #include <valarray>
+#include "surakarta.h"
 
 double SurakartaMoveWeightUtil::CalculateMoveWeight(SurakartaMove move,
-                                                    unsigned int captured_cnt,
+                                                    int captured_cnt,
                                                     int depth) {
     if (move.player == curr_colour_) {
         const auto piece_to = (*board_)[move.to.x][move.to.y];

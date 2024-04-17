@@ -92,7 +92,7 @@ class SurakartaPieceCanCaptureUtil {
 
 class SurakartaGetAllLegalTargetUtil {
    private:
-    const unsigned int board_size_;
+    const int board_size_;
     const std::shared_ptr<const SurakartaBoard> board_;
     const SurakartaPieceMoveUtil util_;
 
@@ -105,7 +105,7 @@ class SurakartaGetAllLegalTargetUtil {
 
 class SurakartaGetAllLegalMovesUtil {
    private:
-    const unsigned int board_size_;
+    const int board_size_;
     const std::shared_ptr<const SurakartaBoard> board_;
     const SurakartaGetAllLegalTargetUtil util_;
 
@@ -119,7 +119,7 @@ class SurakartaGetAllLegalMovesUtil {
 class SurakartaApplyMoveUtil {
    private:
     const std::shared_ptr<const SurakartaBoard> board_;
-    std::list<std::tuple<unsigned int, unsigned int, PieceColor>> revert_list_;
+    std::list<std::tuple<int, int, PieceColor>> revert_list_;
 
     void Pop();
 

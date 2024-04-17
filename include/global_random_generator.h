@@ -5,8 +5,8 @@
 class GlobalRandomGenerator {
    public:
     static std::mt19937& getInstance();
-    static void setSeed(unsigned int seed);
+    static void setSeed(int seed);
 
    private:
-    static unsigned int getSeedFromEnvironment();
+    static int getSeedFromEnvironment();
 };

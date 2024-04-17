@@ -215,8 +215,8 @@ std::unique_ptr<std::vector<SurakartaPosition>> SurakartaGetAllLegalTargetUtil::
         }
     }
     auto result = std::make_unique<std::vector<SurakartaPosition>>();
-    for (unsigned int i = 0; i < board_size_; i++) {
-        for (unsigned int j = 0; j < board_size_; j++) {
+    for (int i = 0; i < board_size_; i++) {
+        for (int j = 0; j < board_size_; j++) {
             if (result_map->at(i * board_size_ + j))
                 result->push_back(SurakartaPosition(i, j));
         }
@@ -226,8 +226,8 @@ std::unique_ptr<std::vector<SurakartaPosition>> SurakartaGetAllLegalTargetUtil::
 
 std::unique_ptr<std::vector<SurakartaMove>> SurakartaGetAllLegalMovesUtil::GetAllLegalMoves(PieceColor colour) const {
     auto result = std::make_unique<std::vector<SurakartaMove>>();
-    for (unsigned int i = 0; i < board_size_; i++) {
-        for (unsigned int j = 0; j < board_size_; j++) {
+    for (int i = 0; i < board_size_; i++) {
+        for (int j = 0; j < board_size_; j++) {
             const auto piece = (*board_)[i][j];
             if (piece->GetColor() == colour) {
                 const auto targets = util_.GetAllLegalTarget(*piece);
