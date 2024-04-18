@@ -7,40 +7,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Setup CMake
-      uses: jwlawson/actions-setup-cmake@v2.0.1
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2.0.1
 
-    - name: Configure and Build with GCC
-      run: |
-        export CC=/usr/bin/gcc
-        export CXX=/usr/bin/g++
-        mkdir build
-        cd build
-        cmake ..
-        make -j
+      - name: Configure and Build with GCC
+        run: |
+          export CC=/usr/bin/gcc
+          export CXX=/usr/bin/g++
+          mkdir build
+          cd build
+          cmake ..
+          make -j
 
-    - name: Run Tests
-      run: |
-        export LOG_LEVEL=1
-        ./build/bin/libsurakarta-test
+      - name: Run Tests
+        run: |
+          export LOG_LEVEL=1
+          ./build/bin/surakarta-test
 
-    - name: Configure and Build with Clang
-      run: |
-        rm -rf build
-        export CC=/usr/bin/clang
-        export CXX=/usr/bin/clang++
-        mkdir build
-        cd build
-        cmake ..
-        make -j
-  
-    - name: Run Tests
-      run: |
-        export LOG_LEVEL=1
-        ./build/bin/libsurakarta-test
-        ./build/bin/libsurakarta-benchmark statistic -n 100
+      - name: Configure and Build with Clang
+        run: |
+          rm -rf build
+          export CC=/usr/bin/clang
+          export CXX=/usr/bin/clang++
+          mkdir build
+          cd build
+          cmake ..
+          make -j
+
+      - name: Run Tests
+        run: |
+          export LOG_LEVEL=1
+          ./build/bin/surakarta-test
+          ./build/bin/surakarta-benchmark statistic -n 100
