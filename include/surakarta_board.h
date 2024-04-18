@@ -8,27 +8,27 @@
 
 class SurakartRow : public std::vector<std::shared_ptr<SurakartaPiece>> {
    public:
-    SurakartRow(unsigned int board_size)
+    SurakartRow(int board_size)
         : std::vector<std::shared_ptr<SurakartaPiece>>(board_size) {}
 };
 
 class SurakartaBoard : public std::vector<SurakartRow> {
    public:
-    unsigned int board_size_;
-    SurakartaBoard(unsigned int board_size)
+    int board_size_;
+    SurakartaBoard(int board_size)
         : board_size_(board_size) {
-        for (unsigned int i = 0; i < board_size_; i++) {
+        for (int i = 0; i < board_size_; i++) {
             this->push_back(SurakartRow(board_size_));
         }
     }
 
     bool IsInside(const SurakartaPosition& position) const {
-        return position.x < board_size_ && position.y < board_size_;
+        return position.x >= 0 && position.y >= 0 && position.x < board_size_ && position.y < board_size_;
     }
 
     friend inline std::ostream& operator<<(std::ostream& os, const SurakartaBoard& board) {
-        for (unsigned int y = 0; y < board.board_size_; y++) {
-            for (unsigned int x = 0; x < board.board_size_; x++) {
+        for (int y = 0; y < board.board_size_; y++) {
+            for (int x = 0; x < board.board_size_; x++) {
                 os << (*board[x][y]) << " ";
             }
             os << std::endl;
@@ -37,8 +37,8 @@ class SurakartaBoard : public std::vector<SurakartRow> {
     }
 
     friend inline std::istream& operator>>(std::istream& is, SurakartaBoard& board) {
-        for (unsigned int y = 0; y < board.board_size_; y++) {
-            for (unsigned int x = 0; x < board.board_size_; x++) {
+        for (int y = 0; y < board.board_size_; y++) {
+            for (int x = 0; x < board.board_size_; x++) {
                 char ch;
                 is >> ch;
                 PieceColor color;

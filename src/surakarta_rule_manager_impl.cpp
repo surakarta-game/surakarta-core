@@ -98,5 +98,5 @@ std::unique_ptr<std::vector<SurakartaPosition>> SurakartaRuleManagerImpl::GetAll
         return std::make_unique<std::vector<SurakartaPosition>>();
     const auto piece_ptr = (*board_)[postion.x][postion.y];
     const auto util = SurakartaGetAllLegalTargetUtil(board_);
-    return util.GetAllLegalTarget(*piece_ptr);
+    return util.GetAllLegalTargets(*piece_ptr);
 }

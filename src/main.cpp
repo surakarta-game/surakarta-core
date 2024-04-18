@@ -16,52 +16,68 @@ int play(int miliseconds = 50,
          int depth = SurakartaMoveWeightUtil::DefaultDepth,
          double alpha = SurakartaMoveWeightUtil::DefaultAlpha,
          double beta = SurakartaMoveWeightUtil::DefaultBeta) {
-    SurakartaGame game;
-    game.StartGame();
+    const auto move_weight_util_factory = std::make_shared<SurakartaAgentMineFactory::SurakartaMoveWeightUtilFactory>(depth, alpha, beta);
+    const auto agent_factory_mine = std::make_shared<SurakartaAgentMineFactory>(move_weight_util_factory);
+    const auto agent_factory_random = std::make_shared<SurakartaAgentRandomFactory>();
+    const auto my_colour = GlobalRandomGenerator().getInstance()() % 2 ? PieceColor::BLACK : PieceColor::WHITE;
+    const auto agent_factory_black = my_colour == PieceColor::BLACK ? (std::shared_ptr<SurakartaDaemon::AgentFactory>)agent_factory_mine : agent_factory_random;
+    const auto agent_factory_white = my_colour == PieceColor::WHITE ? (std::shared_ptr<SurakartaDaemon::AgentFactory>)agent_factory_mine : agent_factory_random;
+    auto daemon = SurakartaDaemon(BOARD_SIZE, MAX_NO_CAPTURE_ROUND, agent_factory_black, agent_factory_white);
 
-    if (display)
-        std::cout << ANSI_CLEAR_SCREEN << ANSI_MOVE_TO_START;
-    const bool is_mine_at_start = GlobalRandomGenerator().getInstance()() % 2;
-    bool is_mine = is_mine_at_start;
-    const std::shared_ptr<SurakartaAgentBase> agent_mine = std::make_shared<SurakartaAgentMine>(
-        game.GetBoard(),
-        game.GetGameInfo(),
-        game.GetRuleManager(),
-        is_mine ? SurakartaPlayer::BLACK : SurakartaPlayer::WHITE,
-        std::make_shared<SurakartaMoveWeightUtil>(game.GetBoard(),
-                                                  is_mine ? SurakartaPlayer::BLACK : SurakartaPlayer::WHITE,
-                                                  depth,
-                                                  alpha,
-                                                  beta));
-    const std::shared_ptr<SurakartaAgentBase> agent_random = std::make_shared<SurakartaAgentRandom>(
-        game.GetBoard(),
-        game.GetGameInfo(),
-        game.GetRuleManager());
-    while (!game.IsEnd()) {
-        auto move = (is_mine ? agent_mine : agent_random)->CalculateMove();
-        game.Move(move);
-        is_mine = !is_mine;
-        if (display) {
-            std::cout << "B: " << (is_mine_at_start ? "Mine" : "Random") << std::endl;
-            std::cout << "W: " << (is_mine_at_start ? "Random" : "Mine") << std::endl;
-            std::cout << std::endl;
-            std::cout << *game.GetBoard() << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
-            std::cout << ANSI_CLEAR_SCREEN << ANSI_MOVE_TO_START;
+    const auto black_pieces = std::make_shared<std::vector<SurakartaPositionWithId>>();
+    const auto white_pieces = std::make_shared<std::vector<SurakartaPositionWithId>>();
+    bool piece_lists_initialized = false;
+    SurakartaOnBoardUpdateUtil on_board_update_util(black_pieces, white_pieces, daemon.Board());
+
+    daemon.OnUpdateBoard.AddListener([&]() {
+        if (!piece_lists_initialized) {
+            const auto lists = SurakartaInitPositionListsUtil(daemon.Board()).InitPositionList();
+            *black_pieces = *lists.black_list;
+            *white_pieces = *lists.white_list;
+            piece_lists_initialized = true;
         }
-    }
-    const bool is_stalemate = game.GetGameInfo()->Winner() == SurakartaPlayer::NONE;
-    const bool has_win = !((game.GetGameInfo()->Winner() == SurakartaPlayer::BLACK) ^ is_mine_at_start);
-    if (display) {
-        std::cout << "B: " << (is_mine_at_start ? "Mine" : "Random") << std::endl;
-        std::cout << "W: " << (is_mine_at_start ? "Random" : "Mine") << std::endl;
-        std::cout << std::endl;
-        std::cout << *game.GetBoard();
-        std::cout << std::endl;
-        std::cout << game.GetGameInfo()->end_reason_ << ": "
-                  << (is_stalemate ? "None" : (has_win ? "Mine" : "Random"))
-                  << std::endl;
-    }
+        const auto opt_trace = on_board_update_util.UpdateAndGetTrace();
+        if (opt_trace.has_value()) {
+            PieceColor moved_colour = PieceColor::NONE;
+            for (auto& item : *black_pieces) {
+                if (item.id == opt_trace->moved_piece.id)
+                    moved_colour = PieceColor::BLACK;
+            }
+            for (auto& item : *white_pieces) {
+                if (item.id == opt_trace->moved_piece.id)
+                    moved_colour = PieceColor::WHITE;
+            }
+            if (moved_colour == PieceColor::NONE)
+                throw std::runtime_error("moved piece not found in black_pieces or white_pieces");
+            const auto guard = opt_trace.value().is_capture ? SurakartaTemporarilyChangeColorGuardUtil(
+                                                                  daemon.Board(),
+                                                                  SurakartaPosition(
+                                                                      opt_trace.value().captured_piece.x,
+                                                                      opt_trace.value().captured_piece.y),
+                                                                  ReverseColor(moved_colour))
+                                                            : SurakartaTemporarilyChangeColorGuardUtil();
+            for (auto& fragment : *opt_trace.value().path) {
+                SurakartaTemporarilyChangeColorGuardUtil guard1(daemon.Board(), fragment.From(), PieceColor::NONE);
+                SurakartaTemporarilyChangeColorGuardUtil guard2(daemon.Board(), fragment.To(), moved_colour);
+                std::this_thread::sleep_for(std::chrono::milliseconds(
+                    fragment.is_curve ? miliseconds * 2 : 0));
+
+                if (display) {
+                    std::cout << ANSI_CLEAR_SCREEN << ANSI_MOVE_TO_START;
+                    std::cout << "B: " << (my_colour == PieceColor::BLACK ? "Mine" : "Random") << std::endl;
+                    std::cout << "W: " << (my_colour == PieceColor::WHITE ? "Mine" : "Random") << std::endl;
+                    std::cout << std::endl;
+                    std::cout << *daemon.Board() << std::endl;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
+            }
+        }
+    });
+
+    daemon.Execute();
+
+    const bool is_stalemate = daemon.GameInfo()->Winner() == SurakartaPlayer::NONE;
+    const bool has_win = !((daemon.GameInfo()->Winner() == SurakartaPlayer::BLACK) ^ (my_colour == PieceColor::BLACK));
     return is_stalemate ? STALEMATE : (has_win ? WIN_MIME : WIN_RANDOM);
 }
 
