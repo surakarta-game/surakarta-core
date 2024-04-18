@@ -43,3 +43,4 @@ jobs:
       run: |
         export LOG_LEVEL=1
         ./build/bin/libsurakarta-test
+        ./build/bin/libsurakarta-benchmark statistic -n 100

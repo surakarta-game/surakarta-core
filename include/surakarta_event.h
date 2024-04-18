@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 
-template <typename T, typename... Args>
+template <typename... Args>
 class SurakartaEvent {
    public:
     void AddListener(std::function<void(Args...)> listener) {

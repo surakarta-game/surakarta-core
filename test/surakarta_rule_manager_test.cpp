@@ -146,7 +146,7 @@ TEST(SurakartaRuleManagerTest, LegalTargetTest) {
                 for (int y = 0; y < BOARD_SIZE; y++) {
                     const auto piece = (*board)[x][y];
                     if (piece->GetColor() != PieceColor::NONE) {
-                        const auto list = util2.GetAllLegalTarget(*piece);
+                        const auto list = util2.GetAllLegalTargets(*piece);
                         auto map = std::vector<bool>(BOARD_SIZE * BOARD_SIZE, false);
                         for (int x_to = 0; x_to < BOARD_SIZE; x_to++) {
                             for (int y_to = 0; y_to < BOARD_SIZE; y_to++) {

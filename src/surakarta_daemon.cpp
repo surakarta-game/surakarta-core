@@ -34,7 +34,9 @@ void SurakartaDaemon::Execute() {
     game_.StartGame();
     auto current = PieceColor::BLACK;
     while (!game_.IsEnd()) {
+        status_ = current == PieceColor::BLACK ? ExecuteStatus::WAITING_FOR_BLACK_AGENT : ExecuteStatus::WAITING_FOR_WHITE_AGENT;
         game_.Move(current == PieceColor::BLACK ? black_agent_->CalculateMove() : white_agent_->CalculateMove());
         current = ReverseColor(current);
     }
+    status_ = ExecuteStatus::ENDED;
 }

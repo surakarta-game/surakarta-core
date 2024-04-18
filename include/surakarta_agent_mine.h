@@ -74,3 +74,49 @@ class SurakartaAgentMine : public SurakartaAgentBase {
           random_engine_(GlobalRandomGenerator::getInstance()) {}
     SurakartaMove CalculateMove() override;
 };
+
+class SurakartaAgentMineFactory : public SurakartaDaemon::AgentFactory {
+   public:
+    class SurakartaMoveWeightUtilBaseFactory {
+       public:
+        virtual ~SurakartaMoveWeightUtilBaseFactory() = default;
+        virtual std::unique_ptr<SurakartaMoveWeightUtilBase> CreateUtil(SurakartaDaemon& daemon, PieceColor my_color) = 0;
+    };
+
+    class SurakartaMoveWeightUtilFactory : public SurakartaMoveWeightUtilBaseFactory {
+       public:
+        SurakartaMoveWeightUtilFactory(
+            int depth = SurakartaMoveWeightUtil::DefaultDepth,
+            double alpha = SurakartaMoveWeightUtil::DefaultAlpha,
+            double beta = SurakartaMoveWeightUtil::DefaultBeta)
+            : depth_(depth), alpha_(alpha), beta_(beta) {}
+
+        virtual std::unique_ptr<SurakartaMoveWeightUtilBase> CreateUtil(SurakartaDaemon& daemon, PieceColor my_color) override {
+            return std::make_unique<SurakartaMoveWeightUtil>(
+                daemon.Board(),
+                my_color,
+                depth_,
+                alpha_,
+                beta_);
+        }
+
+       private:
+        const int depth_;
+        const double alpha_;
+        const double beta_;
+    };
+
+    SurakartaAgentMineFactory(std::shared_ptr<SurakartaMoveWeightUtilBaseFactory> weight_util_factory)
+        : weight_util_factory_(weight_util_factory){};
+
+   private:
+    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor color) override {
+        return std::make_unique<SurakartaAgentMine>(
+            daemon.Board(),
+            daemon.GameInfo(),
+            daemon.RuleManager(),
+            color,
+            weight_util_factory_->CreateUtil(daemon, color));
+    }
+    const std::shared_ptr<SurakartaMoveWeightUtilBaseFactory> weight_util_factory_;
+};
