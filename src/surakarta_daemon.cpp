@@ -10,7 +10,7 @@ class SurakartaRuleManagerImplForwardingSignalToSurakartaDaemon : public Surakar
           daemon_(daemon) {}
 
     virtual void OnUpdateBoard() override {
-        daemon_.OnUpdateBoard();
+        daemon_.OnUpdateBoard.Invoke();
     }
 
    private:

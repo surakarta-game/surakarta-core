@@ -11,37 +11,6 @@
 #define WIN_RANDOM 2
 #define STALEMATE 3
 
-class SurakartaDaemonOnConsoleMineAgentVsRandomAgent : public SurakartaDaemon {
-   public:
-    SurakartaDaemonOnConsoleMineAgentVsRandomAgent(int board_size,
-                                                   int max_no_capture_round,
-                                                   std::shared_ptr<AgentFactory> black_agent_factory,
-                                                   std::shared_ptr<AgentFactory> white_agent_factory,
-                                                   PieceColor my_colour,
-                                                   int miliseconds = 50,
-                                                   bool display = true)
-        : SurakartaDaemon(board_size, max_no_capture_round, black_agent_factory, white_agent_factory),
-          my_colour_(my_colour),
-          miliseconds_(miliseconds),
-          display_(display) {}
-
-    virtual void OnUpdateBoard() override {
-        if (display_) {
-            std::cout << ANSI_CLEAR_SCREEN << ANSI_MOVE_TO_START;
-            std::cout << "B: " << (my_colour_ == PieceColor::BLACK ? "Mine" : "Random") << std::endl;
-            std::cout << "W: " << (my_colour_ == PieceColor::WHITE ? "Mine" : "Random") << std::endl;
-            std::cout << std::endl;
-            std::cout << *Board() << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds_));
-        }
-    }
-
-   private:
-    PieceColor my_colour_;
-    int miliseconds_;
-    bool display_;
-};
-
 int play(int miliseconds = 50,
          bool display = true,
          int depth = SurakartaMoveWeightUtil::DefaultDepth,
@@ -53,9 +22,19 @@ int play(int miliseconds = 50,
     const auto my_colour = GlobalRandomGenerator().getInstance()() % 2 ? PieceColor::BLACK : PieceColor::WHITE;
     const auto agent_factory_black = my_colour == PieceColor::BLACK ? (std::shared_ptr<SurakartaDaemon::AgentFactory>)agent_factory_mine : agent_factory_random;
     const auto agent_factory_white = my_colour == PieceColor::WHITE ? (std::shared_ptr<SurakartaDaemon::AgentFactory>)agent_factory_mine : agent_factory_random;
-    auto daemon = SurakartaDaemonOnConsoleMineAgentVsRandomAgent(
-        BOARD_SIZE, MAX_NO_CAPTURE_ROUND, agent_factory_black, agent_factory_white,
-        my_colour, miliseconds, display);
+    auto daemon = SurakartaDaemon(BOARD_SIZE, MAX_NO_CAPTURE_ROUND, agent_factory_black, agent_factory_white);
+    const auto on_update_board = [&]() {
+        if (display) {
+            std::cout << ANSI_CLEAR_SCREEN << ANSI_MOVE_TO_START;
+            std::cout << "B: " << (my_colour == PieceColor::BLACK ? "Mine" : "Random") << std::endl;
+            std::cout << "W: " << (my_colour == PieceColor::WHITE ? "Mine" : "Random") << std::endl;
+            std::cout << std::endl;
+            std::cout << *daemon.Board() << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
+        }
+    };
+    daemon.OnUpdateBoard.AddListener(on_update_board);
+
     daemon.Execute();
 
     const bool is_stalemate = daemon.GameInfo()->Winner() == SurakartaPlayer::NONE;

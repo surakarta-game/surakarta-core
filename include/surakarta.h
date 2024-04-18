@@ -6,6 +6,7 @@
 #include "surakarta_board.h"
 #include "surakarta_common.h"
 #include "surakarta_daemon.h"
+#include "surakarta_event.h"
 #include "surakarta_game.h"
 #include "surakarta_piece.h"
 #include "surakarta_reason.h"

@@ -38,10 +38,10 @@ struct SurakartaMoveTrace {
     std::unique_ptr<std::vector<SurakartaMovePathFragment>> path;
 };
 
-class SurakartaAgentInteractive {
+class SurakartaAgentInteractive : public SurakartaDaemon::AgentFactory {
    public:
     SurakartaAgentInteractive(std::shared_ptr<SurakartaDaemon> daemon);
-    std::unique_ptr<SurakartaAgentBase> CreateAgent();
+    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor my_color) override;
 
     bool IsMyTurn();
     std::unique_ptr<std::vector<PieceId>> MyPieces();

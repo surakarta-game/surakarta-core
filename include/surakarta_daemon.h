@@ -3,6 +3,7 @@
 #include "surakarta_agent_mine.h"
 #include "surakarta_agent_random.h"
 #include "surakarta_board.h"
+#include "surakarta_event.h"
 #include "surakarta_game.h"
 
 class SurakartaDaemon {
@@ -21,8 +22,7 @@ class SurakartaDaemon {
 
     void Execute();
 
-    virtual void OnUpdateBoard() {};
-
+    SurakartaEvent<void> OnUpdateBoard;
     std::shared_ptr<SurakartaGameInfo> GameInfo() const { return game_.GetGameInfo(); }
     std::shared_ptr<SurakartaBoard> Board() const { return game_.GetBoard(); }
     std::shared_ptr<SurakartaRuleManager> RuleManager() const { return game_.GetRuleManager(); }
