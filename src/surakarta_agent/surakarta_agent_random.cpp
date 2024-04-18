@@ -1,12 +1,12 @@
 #include "surakarta_agent_random.h"
-#include "global_random_generator.h"
 #include <algorithm>
+#include "global_random_generator.h"
 
 SurakartaMove SurakartaAgentRandom::CalculateMove() {
     std::vector<SurakartaPosition> from;
     std::vector<SurakartaPosition> to;
-    for (unsigned int i = 0; i < board_size_; i++) {
-        for (unsigned int j = 0; j < board_size_; j++) {
+    for (int i = 0; i < board_size_; i++) {
+        for (int j = 0; j < board_size_; j++) {
             SurakartaPosition position = {i, j};
             if ((*board_)[i][j]->GetColor() == game_info_->current_player_) {
                 from.push_back(position);
