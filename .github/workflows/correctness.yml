@@ -27,7 +27,7 @@ jobs:
     - name: Run Tests
       run: |
         export LOG_LEVEL=1
-        ./build/bin/libsurakarta-test
+        ./build/bin/surakarta-test
 
     - name: Configure and Build with Clang
       run: |
@@ -42,4 +42,4 @@ jobs:
     - name: Run Tests
       run: |
         export LOG_LEVEL=1
-        ./build/bin/libsurakarta-test
+        ./build/bin/surakarta-test
