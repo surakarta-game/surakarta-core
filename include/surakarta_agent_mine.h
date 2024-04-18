@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "global_random_generator.h"
 #include "surakarta_agent_base.h"
 #include "surakarta_utils.h"
 
@@ -13,6 +14,8 @@ class SurakartaMoveWeightUtilBase {
    public:
     SurakartaMoveWeightUtilBase(std::shared_ptr<SurakartaBoard> board, PieceColor curr_colour)
         : board_(board), curr_colour_(curr_colour), oppo_colour_(ReverseColor(curr_colour)) {}
+
+    virtual ~SurakartaMoveWeightUtilBase() = default;
 
     /// @param move The move to calculate the weight, must be valid.
     virtual double CalculateMoveWeight(SurakartaMove move) = 0;

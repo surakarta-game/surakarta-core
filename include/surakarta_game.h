@@ -40,7 +40,7 @@ class SurakartaMoveResponse {
 
 class SurakartaGame {
    public:
-    SurakartaGame(int board_size = BOARD_SIZE, int max_no_capture_round = 40)
+    SurakartaGame(int board_size = BOARD_SIZE, int max_no_capture_round = MAX_NO_CAPTURE_ROUND)
         : board_size_(board_size),
           board_(std::make_shared<SurakartaBoard>(board_size)),
           game_info_(std::make_shared<SurakartaGameInfo>(max_no_capture_round)),

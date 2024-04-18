@@ -4,6 +4,8 @@
 #include "surakarta_piece.h"
 #include "surakarta_reason.h"
 
+#define MAX_NO_CAPTURE_ROUND 40
+
 struct SurakartaMove {
     SurakartaPosition from;
     SurakartaPosition to;
@@ -28,7 +30,7 @@ struct SurakartaGameInfo {
     SurakartaPlayer winner_;
     int max_no_capture_round_;
 
-    SurakartaGameInfo(int max_no_capture_round = 40)
+    SurakartaGameInfo(int max_no_capture_round = MAX_NO_CAPTURE_ROUND)
         : current_player_(SurakartaPlayer::BLACK),
           num_round_(1),
           last_captured_round_(0),
