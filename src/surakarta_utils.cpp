@@ -619,5 +619,8 @@ SurakartaInitPositionListsUtil::PositionLists SurakartaInitPositionListsUtil::In
             }
         }
     }
-    return PositionLists{.black_list = std::move(black), .white_list = std::move(white)};
+    PositionLists lists;
+    lists.black_list = std::move(black);
+    lists.white_list = std::move(white);
+    return lists;
 }

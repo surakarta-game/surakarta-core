@@ -243,7 +243,7 @@ class SurakartaOnBoardUpdateUtil {
         : id_position_list_black_(id_position_list_black_),
           id_position_list_white_(id_position_list_white_),
           board_(board),
-          move_util_(board->size()),
+          move_util_((int)board->size()),
           movability_util_(board),
           trace_generate_util_(board, id_position_list_black_, id_position_list_white_) {}
 
