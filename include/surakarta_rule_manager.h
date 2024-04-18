@@ -15,7 +15,7 @@ class SurakartaRuleManager {
           board_(std::const_pointer_cast<const SurakartaBoard>(board)),
           game_info_(std::const_pointer_cast<const SurakartaGameInfo>(game_info)) {}
 
-    unsigned int GetBoardSize() {
+    int GetBoardSize() {
         return board_size_;
     }
 
@@ -40,7 +40,7 @@ class SurakartaRuleManager {
     virtual std::unique_ptr<std::vector<SurakartaPosition>> GetAllLegalTarget(const SurakartaPosition postion);
 
     //    protected:
-    unsigned int board_size_;
+    int board_size_;
     std::shared_ptr<const SurakartaBoard> board_;
     std::shared_ptr<const SurakartaGameInfo> game_info_;
 

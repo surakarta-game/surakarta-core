@@ -24,8 +24,8 @@ make
 ```
 
 Binary outputs can be found in build/bin and build/lib:
- - build/bin/libsurakarta-benchmark: a simple CLI tool for benchmark
- - build/bin/libsurakarta-test: unit tests
+ - build/bin/surakarta-benchmark: a simple CLI tool for benchmark
+ - build/bin/surakarta-test: unit tests
  - build/lib/libsurakarta.a: the library that contains rule manager and the simple AI
 
  ### Windows

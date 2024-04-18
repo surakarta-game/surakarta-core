@@ -40,7 +40,7 @@ class SurakartaMoveResponse {
 
 class SurakartaGame {
    public:
-    SurakartaGame(unsigned board_size = BOARD_SIZE, unsigned int max_no_capture_round = 40)
+    SurakartaGame(int board_size = BOARD_SIZE, int max_no_capture_round = MAX_NO_CAPTURE_ROUND)
         : board_size_(board_size),
           board_(std::make_shared<SurakartaBoard>(board_size)),
           game_info_(std::make_shared<SurakartaGameInfo>(max_no_capture_round)),
@@ -70,7 +70,7 @@ class SurakartaGame {
      */
     SurakartaMoveResponse Move(const SurakartaMove& move);
 
-    unsigned int GetBoardSize() const { return board_size_; }
+    int GetBoardSize() const { return board_size_; }
     std::shared_ptr<SurakartaBoard> GetBoard() const { return board_; }
     std::shared_ptr<SurakartaGameInfo> GetGameInfo() const { return game_info_; }
     // std::shared_ptr<SurakartaAgentBase> GetAgent() const { return agent_; }
@@ -82,7 +82,7 @@ class SurakartaGame {
     std::shared_ptr<SurakartaRuleManager> GetRuleManager() const { return rule_manager_; }  // For testing.
 
     //    private:
-    unsigned int board_size_;
+    int board_size_;
     std::shared_ptr<SurakartaBoard> board_;
     std::shared_ptr<SurakartaGameInfo> game_info_;
     std::shared_ptr<SurakartaRuleManager> rule_manager_;

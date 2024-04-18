@@ -142,14 +142,14 @@ TEST(SurakartaRuleManagerTest, LegalTargetTest) {
 
             const auto util = SurakartaMovablityUtil(board);
             const auto util2 = SurakartaGetAllLegalTargetUtil(board);
-            for (unsigned int x = 0; x < BOARD_SIZE; x++) {
-                for (unsigned int y = 0; y < BOARD_SIZE; y++) {
+            for (int x = 0; x < BOARD_SIZE; x++) {
+                for (int y = 0; y < BOARD_SIZE; y++) {
                     const auto piece = (*board)[x][y];
                     if (piece->GetColor() != PieceColor::NONE) {
-                        const auto list = util2.GetAllLegalTarget(*piece);
+                        const auto list = util2.GetAllLegalTargets(*piece);
                         auto map = std::vector<bool>(BOARD_SIZE * BOARD_SIZE, false);
-                        for (unsigned int x_to = 0; x_to < BOARD_SIZE; x_to++) {
-                            for (unsigned int y_to = 0; y_to < BOARD_SIZE; y_to++) {
+                        for (int x_to = 0; x_to < BOARD_SIZE; x_to++) {
+                            for (int y_to = 0; y_to < BOARD_SIZE; y_to++) {
                                 const auto piece_to = (*board)[x_to][y_to];
                                 const auto movability1 = util.IsMovableTo(*piece, *piece_to);
                                 const auto movability2 = std::find(list->begin(), list->end(), SurakartaPosition(x_to, y_to)) != list->end();

@@ -61,10 +61,14 @@ inline std::istream& operator>>(std::istream& is, PieceColor& color) {
 }
 
 struct SurakartaPosition {
-    unsigned int x;
-    unsigned int y;
-    SurakartaPosition(unsigned int x = 0, unsigned int y = 0)
-        : x(x), y(y) {}
+    int x;
+    int y;
+    SurakartaPosition(int x = 0, int y = 0, bool debug_check = false, int board_size = 6)
+        : x(x), y(y) {
+        if (debug_check && (x < 0 || x >= board_size || y < 0 || y >= board_size)) {
+            throw std::runtime_error("SurakartaPosition out of range");
+        }
+    }
     friend std::ostream& operator<<(std::ostream& os, const SurakartaPosition& pos) {
         os << "(" << pos.x << ", " << pos.y << ")";
         return os;
@@ -82,7 +86,7 @@ class SurakartaPiece {
     SurakartaPiece()
         : position_({0, 0}), color_(PieceColor::NONE) {}
 
-    SurakartaPiece(unsigned int x, unsigned int y, PieceColor color)
+    SurakartaPiece(int x, int y, PieceColor color)
         : position_({x, y}), color_(color) {}
 
     SurakartaPiece(SurakartaPosition position, PieceColor color)
@@ -105,4 +109,82 @@ class SurakartaPiece {
     //    private:
     SurakartaPosition position_;
     PieceColor color_;
+};
+
+typedef int PieceId;
+
+struct SurakartaPositionWithId : public SurakartaPosition {
+    PieceId id;
+
+    SurakartaPositionWithId()
+        : SurakartaPosition(0, 0), id(-1) {}
+
+    SurakartaPositionWithId(int x, int y, PieceId id)
+        : SurakartaPosition(x, y), id(id) {}
+};
+
+struct SurakartaMovePathFragment {
+    bool is_curve;
+    union {
+        struct
+        {
+            int start_x;
+            int start_y;
+            int end_x;
+            int end_y;
+        } straight;
+        struct
+        {
+            int center_x;
+            int center_y;
+            int radius;
+            int start_angle;  // 0 = down, 1 = right, 2 = up, 3 = left
+            int end_angle;    // 0 = down, 1 = right, 2 = up, 3 = left
+            bool is_clockwise;
+        } curve;
+    } info;
+
+    SurakartaMovePathFragment(int start_x, int start_y, int end_x, int end_y)
+        : is_curve(false) {
+        info.straight.start_x = start_x;
+        info.straight.start_y = start_y;
+        info.straight.end_x = end_x;
+        info.straight.end_y = end_y;
+    }
+    SurakartaMovePathFragment(int center_x, int center_y, int radius, int start_angle, int end_angle, bool is_clockwise)
+        : is_curve(true) {
+        info.curve.center_x = center_x;
+        info.curve.center_y = center_y;
+        info.curve.radius = radius;
+        info.curve.start_angle = start_angle;
+        info.curve.end_angle = end_angle;
+        info.curve.is_clockwise = is_clockwise;
+    }
+    SurakartaPosition From() {
+        if (is_curve) {
+            constexpr int dy[4] = {1, 0, -1, 0};
+            constexpr int dx[4] = {0, 1, 0, -1};
+            return SurakartaPosition(info.curve.center_x + dx[info.curve.start_angle] * info.curve.radius,
+                                     info.curve.center_y + dy[info.curve.start_angle] * info.curve.radius, true);
+        } else {
+            return SurakartaPosition(info.straight.start_x, info.straight.start_y, true);
+        }
+    }
+    SurakartaPosition To() {
+        if (is_curve) {
+            constexpr int dy[4] = {1, 0, -1, 0};
+            constexpr int dx[4] = {0, 1, 0, -1};
+            return SurakartaPosition(info.curve.center_x + dx[info.curve.end_angle] * info.curve.radius,
+                                     info.curve.center_y + dy[info.curve.end_angle] * info.curve.radius, true);
+        } else {
+            return SurakartaPosition(info.straight.end_x, info.straight.end_y, true);
+        }
+    }
+};
+
+struct SurakartaMoveTrace {
+    bool is_capture;
+    SurakartaPositionWithId moved_piece;
+    SurakartaPositionWithId captured_piece;  // -1 if no piece is captured
+    std::shared_ptr<std::vector<SurakartaMovePathFragment>> path;
 };
