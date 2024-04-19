@@ -12,60 +12,31 @@
 
 class SurakartaAgentInteractive : public SurakartaAgentBase {
    public:
-    virtual SurakartaMove CalculateMove() override { return inner_agent_.CalculateMove(); }
+    SurakartaAgentInteractive(std::shared_ptr<SurakartaBoard> board,
+                              std::shared_ptr<SurakartaGameInfo> game_info,
+                              std::shared_ptr<SurakartaRuleManager> rule_manager)
+        : SurakartaAgentBase(board, game_info, rule_manager) {}
+    virtual SurakartaMove CalculateMove() override = 0;
 
-    bool IsMyTurn();
-    std::shared_ptr<std::vector<SurakartaPositionWithId>> MyPieces() { return mine_pieces_; }
-    std::shared_ptr<std::vector<SurakartaPositionWithId>> OpponentPieces() { return oppo_pieces_; }
+    virtual bool IsMyTurn() = 0;
+    virtual std::shared_ptr<std::vector<SurakartaPositionWithId>> MyPieces() = 0;
+    virtual std::shared_ptr<std::vector<SurakartaPositionWithId>> OpponentPieces() = 0;
 
-    SurakartaPositionWithId SelectedPiece() { return selected_piece_; }
-    bool CanSelectPiece(SurakartaPosition position);
-    bool SelectPiece(SurakartaPosition position);
+    virtual SurakartaPositionWithId SelectedPiece() = 0;
+    virtual bool CanSelectPiece(SurakartaPosition position) = 0;
+    virtual bool SelectPiece(SurakartaPosition position) = 0;
 
-    SurakartaPositionWithId SelectedDestination() { return selected_destination_; }
-    bool CanSelectDestination(SurakartaPosition position);
-    bool SelectDestination(SurakartaPosition position);
+    virtual SurakartaPositionWithId SelectedDestination() = 0;
+    virtual bool CanSelectDestination(SurakartaPosition position) = 0;
+    virtual bool SelectDestination(SurakartaPosition position) = 0;
 
-    bool CanCommitMove();
-    bool CommitMove();
+    virtual bool CanCommitMove() = 0;
+    virtual bool CommitMove() = 0;
 
     SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
-
-   private:
-    friend class SurakartaAgentInteractiveFactory;
-    SurakartaAgentInteractive(SurakartaDaemon& daemon, PieceColor my_color);
-
-    class SurakartaAgentPassive : public SurakartaAgentBase {
-       public:
-        bool IsWaitingForMove() const { return is_waiting_for_move_; }
-        virtual SurakartaMove CalculateMove() override;
-        void CommitMove(SurakartaMove move);
-
-       private:
-        friend class SurakartaAgentInteractive;
-        SurakartaAgentPassive(SurakartaDaemon& daemon)
-            : SurakartaAgentBase(daemon.Board(), daemon.GameInfo(), daemon.RuleManager()) {}
-        volatile bool is_waiting_for_move_ = false;
-        volatile SurakartaMove move_;
-        std::mutex move_mutex_;
-        std::condition_variable move_cv_;
-    };
-
-    SurakartaAgentPassive inner_agent_;
-    SurakartaDaemon& daemon_;
-    PieceColor my_color_;
-    std::shared_ptr<std::vector<SurakartaPositionWithId>> mine_pieces_;
-    std::shared_ptr<std::vector<SurakartaPositionWithId>> oppo_pieces_;
-    SurakartaOnBoardUpdateUtil on_board_update_util_;
-    SurakartaGetAllLegalTargetUtil get_all_legal_target_util_;
-    SurakartaPositionWithId selected_piece_ = SurakartaPositionWithId(0, 0, -1);
-    SurakartaPositionWithId selected_destination_ = SurakartaPositionWithId(0, 0, -1);
 };
 
 class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
    private:
-    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor color [[maybe_unused]]) override {
-        const SurakartaAgentInteractive* agent = new SurakartaAgentInteractive(daemon, color);
-        return std::unique_ptr<SurakartaAgentBase>(const_cast<SurakartaAgentInteractive*>(agent));
-    }
+    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor color [[maybe_unused]]) override;
 };

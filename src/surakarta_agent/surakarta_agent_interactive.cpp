@@ -1,7 +1,59 @@
 #include "surakarta_agent_interactive.h"
 
-SurakartaAgentInteractive::SurakartaAgentInteractive(SurakartaDaemon& daemon, PieceColor my_color)
-    : SurakartaAgentBase(daemon.Board(), daemon.GameInfo(), daemon.RuleManager()),
+class SurakartaAgentInteractiveImpl : public SurakartaAgentInteractive {
+   public:
+    virtual SurakartaMove CalculateMove() override { return inner_agent_.CalculateMove(); }
+
+    virtual bool IsMyTurn() override;
+    virtual std::shared_ptr<std::vector<SurakartaPositionWithId>> MyPieces() override { return mine_pieces_; }
+    virtual std::shared_ptr<std::vector<SurakartaPositionWithId>> OpponentPieces() override { return oppo_pieces_; }
+
+    virtual SurakartaPositionWithId SelectedPiece() override { return selected_piece_; }
+    virtual bool CanSelectPiece(SurakartaPosition position) override;
+    virtual bool SelectPiece(SurakartaPosition position) override;
+
+    virtual SurakartaPositionWithId SelectedDestination() override { return selected_destination_; }
+    virtual bool CanSelectDestination(SurakartaPosition position) override;
+    virtual bool SelectDestination(SurakartaPosition position) override;
+
+    virtual bool CanCommitMove() override;
+    virtual bool CommitMove() override;
+
+    SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
+
+   private:
+    friend class SurakartaAgentInteractiveFactory;
+    SurakartaAgentInteractiveImpl(SurakartaDaemon& daemon, PieceColor my_color);
+
+    class SurakartaAgentPassive : public SurakartaAgentBase {
+       public:
+        bool IsWaitingForMove() const { return is_waiting_for_move_; }
+        virtual SurakartaMove CalculateMove() override;
+        void CommitMove(SurakartaMove move);
+
+       private:
+        friend class SurakartaAgentInteractiveImpl;
+        SurakartaAgentPassive(SurakartaDaemon& daemon)
+            : SurakartaAgentBase(daemon.Board(), daemon.GameInfo(), daemon.RuleManager()) {}
+        volatile bool is_waiting_for_move_ = false;
+        volatile SurakartaMove move_;
+        std::mutex move_mutex_;
+        std::condition_variable move_cv_;
+    };
+
+    SurakartaAgentPassive inner_agent_;
+    SurakartaDaemon& daemon_;
+    PieceColor my_color_;
+    std::shared_ptr<std::vector<SurakartaPositionWithId>> mine_pieces_;
+    std::shared_ptr<std::vector<SurakartaPositionWithId>> oppo_pieces_;
+    SurakartaOnBoardUpdateUtil on_board_update_util_;
+    SurakartaGetAllLegalTargetUtil get_all_legal_target_util_;
+    SurakartaPositionWithId selected_piece_ = SurakartaPositionWithId(0, 0, -1);
+    SurakartaPositionWithId selected_destination_ = SurakartaPositionWithId(0, 0, -1);
+};
+
+SurakartaAgentInteractiveImpl::SurakartaAgentInteractiveImpl(SurakartaDaemon& daemon, PieceColor my_color)
+    : SurakartaAgentInteractive(daemon.Board(), daemon.GameInfo(), daemon.RuleManager()),
       inner_agent_(daemon),
       daemon_(daemon),
       my_color_(my_color),
@@ -21,11 +73,11 @@ SurakartaAgentInteractive::SurakartaAgentInteractive(SurakartaDaemon& daemon, Pi
     });
 }
 
-bool SurakartaAgentInteractive::IsMyTurn() {
+bool SurakartaAgentInteractiveImpl::IsMyTurn() {
     return inner_agent_.IsWaitingForMove();
 }
 
-bool SurakartaAgentInteractive::CanSelectPiece(SurakartaPosition position) {
+bool SurakartaAgentInteractiveImpl::CanSelectPiece(SurakartaPosition position) {
     if (!IsMyTurn()) {
         return false;
     }
@@ -37,7 +89,7 @@ bool SurakartaAgentInteractive::CanSelectPiece(SurakartaPosition position) {
     return false;
 }
 
-bool SurakartaAgentInteractive::SelectPiece(SurakartaPosition position) {
+bool SurakartaAgentInteractiveImpl::SelectPiece(SurakartaPosition position) {
     if (!CanSelectPiece(position)) {
         return false;
     }
@@ -50,7 +102,7 @@ bool SurakartaAgentInteractive::SelectPiece(SurakartaPosition position) {
     throw std::runtime_error("piece can be selected, but not found in mine_pieces_");
 }
 
-bool SurakartaAgentInteractive::CanSelectDestination(SurakartaPosition position) {
+bool SurakartaAgentInteractiveImpl::CanSelectDestination(SurakartaPosition position) {
     if (!IsMyTurn()) {
         return false;
     }
@@ -67,7 +119,7 @@ bool SurakartaAgentInteractive::CanSelectDestination(SurakartaPosition position)
     return false;
 }
 
-bool SurakartaAgentInteractive::SelectDestination(SurakartaPosition position) {
+bool SurakartaAgentInteractiveImpl::SelectDestination(SurakartaPosition position) {
     if (!CanSelectDestination(position)) {
         return false;
     }
@@ -80,11 +132,11 @@ bool SurakartaAgentInteractive::SelectDestination(SurakartaPosition position) {
     throw std::runtime_error("destination can be selected, but not found in oppo_pieces_");
 }
 
-bool SurakartaAgentInteractive::CanCommitMove() {
+bool SurakartaAgentInteractiveImpl::CanCommitMove() {
     return selected_piece_.id != -1 && selected_destination_.id != -1 && IsMyTurn();
 }
 
-bool SurakartaAgentInteractive::CommitMove() {
+bool SurakartaAgentInteractiveImpl::CommitMove() {
     if (!CanCommitMove()) {
         return false;
     }
@@ -92,7 +144,7 @@ bool SurakartaAgentInteractive::CommitMove() {
     return true;
 }
 
-SurakartaMove SurakartaAgentInteractive::SurakartaAgentPassive::CalculateMove() {
+SurakartaMove SurakartaAgentInteractiveImpl::SurakartaAgentPassive::CalculateMove() {
     if (is_waiting_for_move_)
         throw std::runtime_error("Cannot calculate move while already waiting for one!");
     auto lk = std::unique_lock<std::mutex>(move_mutex_);
@@ -104,7 +156,7 @@ SurakartaMove SurakartaAgentInteractive::SurakartaAgentPassive::CalculateMove() 
         move_.player);
 }
 
-void SurakartaAgentInteractive::SurakartaAgentPassive::CommitMove(SurakartaMove move) {
+void SurakartaAgentInteractiveImpl::SurakartaAgentPassive::CommitMove(SurakartaMove move) {
     if (!is_waiting_for_move_)
         throw std::runtime_error("Cannot commit move while not waiting for one!");
     {
@@ -117,4 +169,9 @@ void SurakartaAgentInteractive::SurakartaAgentPassive::CommitMove(SurakartaMove 
         is_waiting_for_move_ = false;
     }
     move_cv_.notify_one();
+}
+
+std::unique_ptr<SurakartaAgentBase> SurakartaAgentInteractiveFactory::CreateAgent(SurakartaDaemon& daemon, PieceColor color [[maybe_unused]]) {
+    const SurakartaAgentInteractive* agent = new SurakartaAgentInteractiveImpl(daemon, color);
+    return std::unique_ptr<SurakartaAgentBase>(const_cast<SurakartaAgentInteractive*>(agent));
 }
