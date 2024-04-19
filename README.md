@@ -1,4 +1,4 @@
-# Surakarta Rule and AI
+# Surakarta Core
 
 This repository is a library for https://github.com/surakarta-game/surakarta-game.
 
@@ -6,7 +6,7 @@ Here you can find the source code for libsurakarta, a library that provides rule
 
 Use the following command to clone the repository with dependencies:
 ```bash
-git clone https://github.com/surakarta-game/surakarta-rule-ai.git --recursive
+git clone https://github.com/surakarta-game/surakarta-core.git --recursive
 ```
 
 ## How to compile
