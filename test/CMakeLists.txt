@@ -10,7 +10,6 @@ set_target_properties(surakarta_ta_lib PROPERTIES IMPORTED_LOCATION ${SURAKARTA_
 if(NOT TARGET surakarta-test)
     add_executable(surakarta-test surakarta_rule_manager_test.cpp)
     target_link_libraries(surakarta-test PRIVATE surakarta surakarta_ta_lib gtest gtest_main)
-    install(TARGETS surakarta-test)
 endif()
 
 # When using clang, -Wdelete-non-abstract-non-virtual-dtor is given.
