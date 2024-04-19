@@ -1,7 +1,5 @@
 #pragma once
 
-#include <condition_variable>
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -10,33 +8,38 @@
 #include "surakarta_piece.h"
 #include "surakarta_utils.h"
 
-class SurakartaAgentInteractive : public SurakartaAgentBase {
+class SurakartaAgentInteractiveFactory;
+
+/// @note This class is thread-safe.
+class SurakartaAgentInteractiveHandler {
    public:
-    SurakartaAgentInteractive(std::shared_ptr<SurakartaBoard> board,
-                              std::shared_ptr<SurakartaGameInfo> game_info,
-                              std::shared_ptr<SurakartaRuleManager> rule_manager)
-        : SurakartaAgentBase(board, game_info, rule_manager) {}
-    virtual SurakartaMove CalculateMove() override = 0;
+    SurakartaAgentInteractiveHandler();
+    ~SurakartaAgentInteractiveHandler();
 
-    virtual bool IsMyTurn() = 0;
-    virtual std::shared_ptr<std::vector<SurakartaPositionWithId>> MyPieces() = 0;
-    virtual std::shared_ptr<std::vector<SurakartaPositionWithId>> OpponentPieces() = 0;
+    /// @note The factory you get is thread-safe.
+    std::shared_ptr<SurakartaDaemon::AgentFactory> GetAgentFactory();
+    bool IsAgentCreated();
 
-    virtual SurakartaPositionWithId SelectedPiece() = 0;
-    virtual bool CanSelectPiece(SurakartaPosition position) = 0;
-    virtual bool SelectPiece(SurakartaPosition position) = 0;
+    // If the agent is not created, the following functions will return false or default values.
 
-    virtual SurakartaPositionWithId SelectedDestination() = 0;
-    virtual bool CanSelectDestination(SurakartaPosition position) = 0;
-    virtual bool SelectDestination(SurakartaPosition position) = 0;
+    bool IsMyTurn();
+    std::unique_ptr<std::vector<SurakartaPositionWithId>> CopyMyPieces();
+    std::unique_ptr<std::vector<SurakartaPositionWithId>> CopyOpponentPieces();
 
-    virtual bool CanCommitMove() = 0;
-    virtual bool CommitMove() = 0;
+    SurakartaPositionWithId SelectedPiece();
+    bool CanSelectPiece(SurakartaPosition position);
+    bool SelectPiece(SurakartaPosition position);
+
+    SurakartaPositionWithId SelectedDestination();
+    bool CanSelectDestination(SurakartaPosition position);
+    bool SelectDestination(SurakartaPosition position);
+
+    bool CanCommitMove();
+    bool CommitMove();
 
     SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
-};
 
-class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
    private:
-    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor color [[maybe_unused]]) override;
+    std::shared_ptr<SurakartaAgentInteractiveFactory> agent_factory_;
+    std::shared_ptr<std::mutex> mutex_;
 };
