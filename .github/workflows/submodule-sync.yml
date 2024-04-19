@@ -8,6 +8,7 @@ on:
 
 jobs:
   sync:
+    permissions: write-all
     name: 'Submodules Sync'
     runs-on: ubuntu-latest
 
@@ -21,7 +22,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       with:
-        token: ${{ secrets.CI_TOKEN }}
         submodules: true
 
     # Update references
