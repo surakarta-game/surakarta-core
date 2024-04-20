@@ -13,6 +13,10 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
         return inner_agent_.IsWaitingForMove();
     }
 
+    PieceColor MyColor() {
+        return my_color_;
+    }
+
     std::shared_ptr<std::vector<SurakartaPositionWithId>> MyPieces() {
         return mine_pieces_;
     }
@@ -260,6 +264,11 @@ bool SurakartaAgentInteractiveHandler::IsAgentCreated() {
 bool SurakartaAgentInteractiveHandler::IsMyTurn() {
     std::lock_guard lk(*mutex_);
     return agent_factory_->agent_.has_value() && agent_factory_->agent_.value()->IsMyTurn();
+}
+
+PieceColor SurakartaAgentInteractiveHandler::MyColor() {
+    std::lock_guard lk(*mutex_);
+    return agent_factory_->agent_.has_value() ? agent_factory_->agent_.value()->MyColor() : PieceColor::UNKNOWN;
 }
 
 std::unique_ptr<std::vector<SurakartaPositionWithId>> SurakartaAgentInteractiveHandler::CopyMyPieces() {

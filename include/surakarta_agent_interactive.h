@@ -23,6 +23,7 @@ class SurakartaAgentInteractiveHandler {
     // If the agent is not created, the following functions will return false or default values.
 
     bool IsMyTurn();
+    PieceColor MyColor();
     std::unique_ptr<std::vector<SurakartaPositionWithId>> CopyMyPieces();
     std::unique_ptr<std::vector<SurakartaPositionWithId>> CopyOpponentPieces();
 
