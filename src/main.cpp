@@ -56,7 +56,7 @@ int play(int miliseconds = 50,
                                                                       opt_trace.value().captured_piece.y),
                                                                   ReverseColor(moved_colour))
                                                             : SurakartaTemporarilyChangeColorGuardUtil();
-            for (auto& fragment : *opt_trace.value().path) {
+            for (auto& fragment : opt_trace.value().path) {
                 SurakartaTemporarilyChangeColorGuardUtil guard1(daemon.Board(), fragment.From(), PieceColor::NONE);
                 SurakartaTemporarilyChangeColorGuardUtil guard2(daemon.Board(), fragment.To(), moved_colour);
                 std::this_thread::sleep_for(std::chrono::milliseconds(

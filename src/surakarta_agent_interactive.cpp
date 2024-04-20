@@ -13,6 +13,10 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
         return inner_agent_.IsWaitingForMove();
     }
 
+    PieceColor MyColor() {
+        return my_color_;
+    }
+
     std::shared_ptr<std::vector<SurakartaPositionWithId>> MyPieces() {
         return mine_pieces_;
     }
@@ -44,14 +48,18 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
         for (auto& piece : *mine_pieces_) {
             if (piece.x == position.x && piece.y == position.y) {
                 selected_piece_ = piece;
+                destination_selected_ = false;
                 return true;
             }
         }
         throw std::runtime_error("piece can be selected, but not found in mine_pieces_");
     }
 
-    SurakartaPositionWithId SelectedDestination() {
-        return selected_destination_;
+    std::optional<SurakartaPosition> SelectedDestination() {
+        if (destination_selected_)
+            return selected_destination_;
+        else
+            return std::nullopt;
     }
 
     bool CanSelectDestination(SurakartaPosition position) {
@@ -75,17 +83,13 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
         if (!CanSelectDestination(position)) {
             return false;
         }
-        for (auto& piece : *oppo_pieces_) {
-            if (piece.x == position.x && piece.y == position.y) {
-                selected_destination_ = piece;
-                return true;
-            }
-        }
-        throw std::runtime_error("destination can be selected, but not found in oppo_pieces_");
+        destination_selected_ = true;
+        selected_destination_ = position;
+        return true;
     }
 
     bool CanCommitMove() {
-        return selected_piece_.id != -1 && selected_destination_.id != -1 && IsMyTurn();
+        return selected_piece_.id != -1 && destination_selected_ && IsMyTurn();
     }
 
     bool CommitMove() {
@@ -93,6 +97,8 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
             return false;
         }
         inner_agent_.CommitMove(SurakartaMove(selected_piece_, selected_destination_, my_color_));
+        selected_piece_ = SurakartaPositionWithId(0, 0, -1);
+        destination_selected_ = false;
         return true;
     }
 
@@ -106,15 +112,15 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
           inner_agent_(daemon),
           daemon_(daemon),
           my_color_(my_color),
-          on_board_update_util_(
-              my_color == PieceColor::BLACK ? mine_pieces_ : oppo_pieces_,
-              my_color == PieceColor::WHITE ? mine_pieces_ : oppo_pieces_,
-              daemon.Board()),
           get_all_legal_target_util_(daemon.Board()) {
         const auto piece_lists = SurakartaInitPositionListsUtil(daemon.Board()).InitPositionList();
         mine_pieces_ = piece_lists.black_list;
         oppo_pieces_ = piece_lists.white_list;
-        auto& util = on_board_update_util_;
+        on_board_update_util_ = std::make_unique<SurakartaOnBoardUpdateUtil>(
+            my_color == PieceColor::BLACK ? mine_pieces_ : oppo_pieces_,
+            my_color == PieceColor::WHITE ? mine_pieces_ : oppo_pieces_,
+            daemon.Board());
+        auto& util = *on_board_update_util_;
         daemon_.OnUpdateBoard.AddListener([this, util]() {
             const auto opt_trace = util.UpdateAndGetTrace();
             if (opt_trace.has_value())
@@ -167,10 +173,11 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
     PieceColor my_color_;
     std::shared_ptr<std::vector<SurakartaPositionWithId>> mine_pieces_;
     std::shared_ptr<std::vector<SurakartaPositionWithId>> oppo_pieces_;
-    SurakartaOnBoardUpdateUtil on_board_update_util_;
+    std::unique_ptr<SurakartaOnBoardUpdateUtil> on_board_update_util_;
     SurakartaGetAllLegalTargetUtil get_all_legal_target_util_;
     SurakartaPositionWithId selected_piece_ = SurakartaPositionWithId(0, 0, -1);
-    SurakartaPositionWithId selected_destination_ = SurakartaPositionWithId(0, 0, -1);
+    bool destination_selected_ = false;
+    SurakartaPosition selected_destination_ = SurakartaPosition(0, 0);
 };
 
 // This class is thread safe, and its instance can be owned both by daemon thread and other threads.
@@ -181,18 +188,17 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
        private:
         friend class SurakartaAgentInteractiveFactory;
         SurakartaAgentInteractiveFactory* volatile factory_;
-        std::shared_ptr<std::mutex> mutex_;
+        // std::shared_ptr<std::mutex> mutex_;
 
        public:
         AgentProxy(std::shared_ptr<SurakartaBoard> board,
                    std::shared_ptr<SurakartaGameInfo> game_info,
                    std::shared_ptr<SurakartaRuleManager> rule_manager,
-                   SurakartaAgentInteractiveFactory* factory,
-                   std::shared_ptr<std::mutex> mutex)
-            : SurakartaAgentBase(board, game_info, rule_manager), factory_(factory), mutex_(mutex) {}
+                   SurakartaAgentInteractiveFactory* factory)
+            : SurakartaAgentBase(board, game_info, rule_manager), factory_(factory) {}
 
         ~AgentProxy() {
-            std::lock_guard lk(*mutex_);
+            // std::lock_guard lk(*mutex_);
             if (factory_ != nullptr) {
                 factory_->agent_.reset();
                 factory_->proxy_ = nullptr;
@@ -200,7 +206,7 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
         }
 
         virtual SurakartaMove CalculateMove() override {
-            std::lock_guard lk(*mutex_);
+            // std::lock_guard lk(*mutex_);
             if (factory_ == nullptr) {
                 throw std::runtime_error("SurakartaAgentInteractiveFactory that created this agent is already destroyed!");
             }
@@ -211,22 +217,24 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
     };
 
     friend class SurakartaAgentInteractiveHandler;
-    std::shared_ptr<std::mutex> mutex_ = std::make_shared<std::mutex>();
+    // std::shared_ptr<std::mutex> mutex_ = std::make_shared<std::mutex>();
     std::optional<std::unique_ptr<SurakartaAgentInteractive>> agent_;
     AgentProxy* volatile proxy_;
+    SurakartaAgentInteractiveHandler* handler_;
 
    public:
-    SurakartaAgentInteractiveFactory() {}
+    SurakartaAgentInteractiveFactory(SurakartaAgentInteractiveHandler* handler)
+        : handler_(handler) {}
 
     ~SurakartaAgentInteractiveFactory() {
-        std::lock_guard lk(*mutex_);
+        // //std::lock_guard lk(*mutex_);
         if (proxy_ != nullptr) {
             proxy_->factory_ = nullptr;
         }
     }
 
     virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor my_color) {
-        std::lock_guard lk(*mutex_);
+        // //std::lock_guard lk(*mutex_);
         if (agent_.has_value()) {
             throw std::runtime_error("SurakartaAgentInteractiveFactory can only create one agent!");
         }
@@ -236,97 +244,108 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
             agent_.value()->board_,
             agent_.value()->game_info_,
             agent_.value()->rule_manager_,
-            this,
-            mutex_);
+            this);
+        if (handler_)
+            agent_.value()->OnMoveCommitted.AddListener([this](SurakartaMoveTrace trace) {
+                handler_->OnMoveCommitted.Invoke(trace);
+            });
+        else
+            printf("Warning: SurakartaAgentInteractiveHandler has been destroyed, so OnMoveCommitted will not be invoked.\n");
         return std::unique_ptr<AgentProxy>(proxy_ptr);
     }
 };
 
 SurakartaAgentInteractiveHandler::SurakartaAgentInteractiveHandler()
-    : agent_factory_(std::make_shared<SurakartaAgentInteractiveFactory>()),
-      mutex_(agent_factory_->mutex_) {}
+    : agent_factory_(std::make_shared<SurakartaAgentInteractiveFactory>(this)) {}
 
-SurakartaAgentInteractiveHandler::~SurakartaAgentInteractiveHandler() {}
+SurakartaAgentInteractiveHandler::~SurakartaAgentInteractiveHandler() {
+    agent_factory_->handler_ = nullptr;
+}
 
 std::shared_ptr<SurakartaDaemon::AgentFactory> SurakartaAgentInteractiveHandler::GetAgentFactory() {
     return agent_factory_;
 }
 
 bool SurakartaAgentInteractiveHandler::IsAgentCreated() {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     return agent_factory_->agent_.has_value();
 }
 
 bool SurakartaAgentInteractiveHandler::IsMyTurn() {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     return agent_factory_->agent_.has_value() && agent_factory_->agent_.value()->IsMyTurn();
 }
 
+PieceColor SurakartaAgentInteractiveHandler::MyColor() {
+    // std::lock_guard lk(*mutex_);
+    return agent_factory_->agent_.has_value() ? agent_factory_->agent_.value()->MyColor() : PieceColor::UNKNOWN;
+}
+
 std::unique_ptr<std::vector<SurakartaPositionWithId>> SurakartaAgentInteractiveHandler::CopyMyPieces() {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
-        return std::unique_ptr<std::vector<SurakartaPositionWithId>>();
+        return std::make_unique<std::vector<SurakartaPositionWithId>>();
     return std::make_unique<std::vector<SurakartaPositionWithId>>(*agent_factory_->agent_.value()->MyPieces());
 }
 
 std::unique_ptr<std::vector<SurakartaPositionWithId>> SurakartaAgentInteractiveHandler::CopyOpponentPieces() {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
-        return std::unique_ptr<std::vector<SurakartaPositionWithId>>();
+        return std::make_unique<std::vector<SurakartaPositionWithId>>();
     return std::make_unique<std::vector<SurakartaPositionWithId>>(*agent_factory_->agent_.value()->OpponentPieces());
 }
 
 SurakartaPositionWithId SurakartaAgentInteractiveHandler::SelectedPiece() {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
         return SurakartaPositionWithId();
     return agent_factory_->agent_.value()->SelectedPiece();
 }
 
 bool SurakartaAgentInteractiveHandler::CanSelectPiece(SurakartaPosition position) {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
         return false;
     return agent_factory_->agent_.value()->CanSelectPiece(position);
 }
 
 bool SurakartaAgentInteractiveHandler::SelectPiece(SurakartaPosition position) {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
         return false;
     return agent_factory_->agent_.value()->SelectPiece(position);
 }
 
-SurakartaPositionWithId SurakartaAgentInteractiveHandler::SelectedDestination() {
-    std::lock_guard lk(*mutex_);
+std::optional<SurakartaPosition> SurakartaAgentInteractiveHandler::SelectedDestination() {
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
         return SurakartaPositionWithId();
     return agent_factory_->agent_.value()->SelectedDestination();
 }
 
 bool SurakartaAgentInteractiveHandler::CanSelectDestination(SurakartaPosition position) {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
         return false;
     return agent_factory_->agent_.value()->CanSelectDestination(position);
 }
 
 bool SurakartaAgentInteractiveHandler::SelectDestination(SurakartaPosition position) {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
         return false;
     return agent_factory_->agent_.value()->SelectDestination(position);
 }
 
 bool SurakartaAgentInteractiveHandler::CanCommitMove() {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
         return false;
     return agent_factory_->agent_.value()->CanCommitMove();
 }
 
 bool SurakartaAgentInteractiveHandler::CommitMove() {
-    std::lock_guard lk(*mutex_);
+    // std::lock_guard lk(*mutex_);
     if (!agent_factory_->agent_.has_value())
         return false;
     return agent_factory_->agent_.value()->CommitMove();
