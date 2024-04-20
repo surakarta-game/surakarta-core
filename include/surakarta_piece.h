@@ -138,8 +138,8 @@ struct SurakartaMovePathFragment {
             int center_x;
             int center_y;
             int radius;
-            int start_angle;  // 0 = down, 1 = right, 2 = up, 3 = left
-            int end_angle;    // 0 = down, 1 = right, 2 = up, 3 = left
+            int start_angle;
+            int end_angle;
             bool is_clockwise;
         } curve;
     } info;
@@ -160,20 +160,20 @@ struct SurakartaMovePathFragment {
         info.curve.end_angle = end_angle;
         info.curve.is_clockwise = is_clockwise;
     }
-    SurakartaPosition From() {
+    SurakartaPosition From() const {
         if (is_curve) {
-            constexpr int dy[4] = {1, 0, -1, 0};
-            constexpr int dx[4] = {0, 1, 0, -1};
+            constexpr int dx[4] = {1, 0, -1, 0};
+            constexpr int dy[4] = {0, 1, 0, -1};
             return SurakartaPosition(info.curve.center_x + dx[info.curve.start_angle] * info.curve.radius,
                                      info.curve.center_y + dy[info.curve.start_angle] * info.curve.radius, true);
         } else {
             return SurakartaPosition(info.straight.start_x, info.straight.start_y, true);
         }
     }
-    SurakartaPosition To() {
+    SurakartaPosition To() const {
         if (is_curve) {
-            constexpr int dy[4] = {1, 0, -1, 0};
-            constexpr int dx[4] = {0, 1, 0, -1};
+            constexpr int dx[4] = {1, 0, -1, 0};
+            constexpr int dy[4] = {0, 1, 0, -1};
             return SurakartaPosition(info.curve.center_x + dx[info.curve.end_angle] * info.curve.radius,
                                      info.curve.center_y + dy[info.curve.end_angle] * info.curve.radius, true);
         } else {
@@ -186,5 +186,5 @@ struct SurakartaMoveTrace {
     bool is_capture;
     SurakartaPositionWithId moved_piece;
     SurakartaPositionWithId captured_piece;  // -1 if no piece is captured
-    std::shared_ptr<std::vector<SurakartaMovePathFragment>> path;
+    std::vector<SurakartaMovePathFragment> path;
 };

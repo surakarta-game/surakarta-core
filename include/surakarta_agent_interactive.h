@@ -24,6 +24,8 @@ class SurakartaAgentInteractiveHandler {
 
     bool IsMyTurn();
     PieceColor MyColor();
+
+    // id starts from 0, self-increasing, from black to white.
     std::unique_ptr<std::vector<SurakartaPositionWithId>> CopyMyPieces();
     std::unique_ptr<std::vector<SurakartaPositionWithId>> CopyOpponentPieces();
 
@@ -31,7 +33,7 @@ class SurakartaAgentInteractiveHandler {
     bool CanSelectPiece(SurakartaPosition position);
     bool SelectPiece(SurakartaPosition position);
 
-    SurakartaPositionWithId SelectedDestination();
+    std::optional<SurakartaPosition> SelectedDestination();
     bool CanSelectDestination(SurakartaPosition position);
     bool SelectDestination(SurakartaPosition position);
 
@@ -42,5 +44,5 @@ class SurakartaAgentInteractiveHandler {
 
    private:
     std::shared_ptr<SurakartaAgentInteractiveFactory> agent_factory_;
-    std::shared_ptr<std::mutex> mutex_;
+    // std::shared_ptr<std::mutex> mutex_;
 };

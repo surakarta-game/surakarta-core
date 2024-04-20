@@ -123,27 +123,27 @@ std::optional<SurakartaMovePathFragment> SurakartaPieceMoveUtil::PathFragment(st
     // Inside:
     if (next.first >= 0 && next.first < board_size_ && next.second >= 0 && next.second < board_size_)
         return SurakartaMovePathFragment(position.x, position.y, next.first, next.second);
+
     // Upper:
     if (next.first >= 1 && next.first < board_size_ / 2 && next.second == -1)
-        return SurakartaMovePathFragment(0, 0, next.first, 1, 0, false);
+        return SurakartaMovePathFragment(0, 0, next.first, 0, 1, true);
     if (next.first >= board_size_ / 2 && next.first < board_size_ - 1 && next.second == -1)
-        return SurakartaMovePathFragment(board_size_ - 1, 0, board_size_ - next.first - 1, 3, 0, true);
+        return SurakartaMovePathFragment(board_size_ - 1, 0, board_size_ - next.first - 1, 2, 1, false);
     // Lower:
     if (next.first >= 1 && next.first < board_size_ / 2 && next.second == board_size_)
-        return SurakartaMovePathFragment(0, board_size_ - 1, next.first, 1, 2, true);
+        return SurakartaMovePathFragment(0, board_size_ - 1, next.first, 0, 3, false);
     if (next.first >= board_size_ / 2 && next.first < board_size_ - 1 && next.second == board_size_)
-        return SurakartaMovePathFragment(board_size_ - 1, board_size_ - 1, board_size_ - next.first - 1, 3, 2, false);
+        return SurakartaMovePathFragment(board_size_ - 1, board_size_ - 1, board_size_ - next.first - 1, 2, 3, true);
     // Left:
     if (next.first == -1 && next.second >= 1 && next.second < board_size_ / 2)
-        return SurakartaMovePathFragment(0, 0, next.second, 0, 1, true);
+        return SurakartaMovePathFragment(0, 0, next.second, 1, 0, false);
     if (next.first == -1 && next.second >= board_size_ / 2 && next.second < board_size_ - 1)
-        return SurakartaMovePathFragment(0, board_size_ - 1, board_size_ - next.second - 1, 2, 1, false);
-
+        return SurakartaMovePathFragment(0, board_size_ - 1, board_size_ - next.second - 1, 3, 0, true);
     // Right:
     if (next.first == board_size_ && next.second >= 1 && next.second < board_size_ / 2)
-        return SurakartaMovePathFragment(board_size_ - 1, 0, next.second, 0, 3, false);
+        return SurakartaMovePathFragment(board_size_ - 1, 0, next.second, 1, 2, true);
     if (next.first == board_size_ && next.second >= board_size_ / 2 && next.second < board_size_ - 1)
-        return SurakartaMovePathFragment(board_size_ - 1, board_size_ - 1, board_size_ - next.second - 1, 2, 3, true);
+        return SurakartaMovePathFragment(board_size_ - 1, board_size_ - 1, board_size_ - next.second - 1, 3, 2, false);
 
     // Corner:
     return std::nullopt;
@@ -531,12 +531,18 @@ SurakartaMoveTrace SurakartaTraceGenerateUtil::GenerateNoneCaptured(SurakartaPos
             break;
         }
     }
-    if (trace.moved_piece.id == -1)
+    if (trace.moved_piece.id == -1) {
+        printf("from: (%d, %d)\n", from.x, from.y);
+        printf("id_position_list: ");
+        for (const auto& pos : *id_position_list) {
+            printf("[%d](%d, %d) ", pos.id, pos.x, pos.y);
+        }
+        printf("\n");
         throw std::runtime_error("piece not found within id_position_list");
+    }
     trace.captured_piece.id = -1;
-    trace.path = std::make_shared<std::vector<SurakartaMovePathFragment>>();
     const auto position_to = from + start_direction;
-    trace.path->push_back(SurakartaMovePathFragment(from.x, from.y, position_to.first, position_to.second));
+    trace.path.push_back(SurakartaMovePathFragment(from.x, from.y, position_to.first, position_to.second));
     return trace;
 }
 
@@ -556,7 +562,6 @@ SurakartaMoveTrace SurakartaTraceGenerateUtil::GenerateCaptured(SurakartaPositio
     }
     if (trace.moved_piece.id == -1)
         throw std::runtime_error("piece not found within id_position_list");
-    trace.path = std::make_shared<std::vector<SurakartaMovePathFragment>>();
     auto curr_position = from;
     auto curr_direction = start_direction;
     int passed_corner_cnt = 0;
@@ -564,7 +569,7 @@ SurakartaMoveTrace SurakartaTraceGenerateUtil::GenerateCaptured(SurakartaPositio
         const auto fragment = move_util_.PathFragment(std::pair(curr_position, curr_direction));
         if (fragment.has_value() == false)
             throw std::runtime_error("not a valid capture move");
-        trace.path->push_back(fragment.value());
+        trace.path.push_back(fragment.value());
         const auto next_pair_opt = move_util_.Next(std::pair(curr_position, curr_direction));  // Try move a step
         if (next_pair_opt.has_value() == false)                                                // At corner
             throw std::logic_error("impossible");
