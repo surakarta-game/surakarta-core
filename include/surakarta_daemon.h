@@ -38,7 +38,7 @@ class SurakartaDaemon {
 
    private:
     SurakartaGame game_;
-    std::unique_ptr<SurakartaAgentBase> black_agent_;
-    std::unique_ptr<SurakartaAgentBase> white_agent_;
+    const std::shared_ptr<AgentFactory> black_agent_factory_;
+    const std::shared_ptr<AgentFactory> white_agent_factory_;
     ExecuteStatus status_ = ExecuteStatus::NOT_STARTED;
 };

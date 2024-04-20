@@ -22,20 +22,22 @@ SurakartaDaemon::SurakartaDaemon(
     int max_no_capture_round,
     std::shared_ptr<AgentFactory> black_agent_factory,
     std::shared_ptr<AgentFactory> white_agent_factory)
-    : game_(board_size, max_no_capture_round) {
+    : game_(board_size, max_no_capture_round),
+      black_agent_factory_(black_agent_factory),
+      white_agent_factory_(white_agent_factory) {
     game_.SetRuleManager(
         std::make_shared<SurakartaRuleManagerImplForwardingSignalToSurakartaDaemon>(
             game_.GetBoard(), game_.GetGameInfo(), *this));
-    black_agent_ = black_agent_factory->CreateAgent(*this, PieceColor::BLACK);
-    white_agent_ = white_agent_factory->CreateAgent(*this, PieceColor::WHITE);
 }
 
 void SurakartaDaemon::Execute() {
+    auto black_agent = black_agent_factory_->CreateAgent(*this, PieceColor::BLACK);
+    auto white_agent = white_agent_factory_->CreateAgent(*this, PieceColor::WHITE);
     game_.StartGame();
     auto current = PieceColor::BLACK;
     while (!game_.IsEnd()) {
         status_ = current == PieceColor::BLACK ? ExecuteStatus::WAITING_FOR_BLACK_AGENT : ExecuteStatus::WAITING_FOR_WHITE_AGENT;
-        game_.Move(current == PieceColor::BLACK ? black_agent_->CalculateMove() : white_agent_->CalculateMove());
+        game_.Move(current == PieceColor::BLACK ? black_agent->CalculateMove() : white_agent->CalculateMove());
         current = ReverseColor(current);
     }
     status_ = ExecuteStatus::ENDED;

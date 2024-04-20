@@ -10,8 +10,8 @@ class SurakartaAgentBase {
                        std::shared_ptr<SurakartaGameInfo> game_info,
                        std::shared_ptr<SurakartaRuleManager> rule_manager)
         : board_size_(board->board_size_),
-          board_(std::const_pointer_cast<const SurakartaBoard>(board)),
-          game_info_(std::const_pointer_cast<const SurakartaGameInfo>(game_info)),
+          board_(board),
+          game_info_(game_info),
           rule_manager_(rule_manager) {}
 
     virtual ~SurakartaAgentBase() = default;
@@ -20,7 +20,7 @@ class SurakartaAgentBase {
 
    protected:
     int board_size_;
-    std::shared_ptr<const SurakartaBoard> board_;
-    std::shared_ptr<const SurakartaGameInfo> game_info_;
+    std::shared_ptr<SurakartaBoard> board_;
+    std::shared_ptr<SurakartaGameInfo> game_info_;
     std::shared_ptr<SurakartaRuleManager> rule_manager_;
 };

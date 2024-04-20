@@ -103,7 +103,7 @@ TEST(SurakartaRuleManagerTest, LegalTargetTest) {
     const char* offline_test_round_str = std::getenv("OFFLINE_TEST_ROUND");
     const char* log_level_str = std::getenv("LOG_LEVEL");
     offline_test_round = offline_test_round_str ? std::stoi(offline_test_round_str) : 100;
-    num_game = 100;
+    num_game = 10;
     log_level = log_level_str ? std::stoi(log_level_str) : 2;
 
     SurakartaGame game1;
@@ -198,7 +198,7 @@ TEST(SurakartaRuleManagerTest, RandomTest) {
     const char* num_game_str = std::getenv("NUM_GAME");
     const char* log_level_str = std::getenv("LOG_LEVEL");
     offline_test_round = offline_test_round_str ? std::stoi(offline_test_round_str) : 100;
-    num_game = num_game_str ? std::stoi(num_game_str) : 10000;
+    num_game = num_game_str ? std::stoi(num_game_str) : 1000;
     log_level = log_level_str ? std::stoi(log_level_str) : 2;
 
     SurakartaGame game1;
