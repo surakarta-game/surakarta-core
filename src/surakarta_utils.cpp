@@ -506,18 +506,15 @@ void SurakartaOnBoardUpdateUtil::Update(const SurakartaMove& move) const {
 SurakartaMoveTrace SurakartaOnBoardUpdateUtil::GetTrace(const SurakartaMove& move, bool is_capture_move) const {
     const auto id_position_list = move.player == PieceColor::BLACK ? id_position_list_black_ : id_position_list_white_;
     const auto guard1 = SurakartaTemporarilyChangeColorGuardUtil(board_, move.from, move.player);
-    const auto guard2 = is_capture_move
-                            ? SurakartaTemporarilyChangeColorGuardUtil(board_, move.to, ReverseColor(move.player))
-                            : SurakartaTemporarilyChangeColorGuardUtil(board_, move.to, PieceColor::NONE);
+    const auto guard2 = SurakartaTemporarilyChangeColorGuardUtil(board_, move.to, is_capture_move ? ReverseColor(move.player) : PieceColor::NONE);
     const auto position = move.from;
     const auto position_to = move.to;
-    if ((*board_)[move.to.x][move.to.y]->GetColor() == PieceColor::NONE) {
-        const auto direction = movability_util_.GetDirectionNoneCapture(*(*board_)[position.x][position.y], *(*board_)[position_to.x][position_to.y]);
-        return trace_generate_util_.GenerateNoneCaptured(position, direction);
-    } else {
-        // good direction
+    if (is_capture_move) {
         const auto start_direction = movability_util_.GetDirectionCapture(*(*board_)[position.x][position.y], *(*board_)[position_to.x][position_to.y]);
         return trace_generate_util_.GenerateCaptured(position, start_direction);
+    } else {
+        const auto direction = movability_util_.GetDirectionNoneCapture(*(*board_)[position.x][position.y], *(*board_)[position_to.x][position_to.y]);
+        return trace_generate_util_.GenerateNoneCaptured(position, direction);
     }
 }
 
