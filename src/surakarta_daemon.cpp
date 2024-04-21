@@ -31,9 +31,9 @@ SurakartaDaemon::SurakartaDaemon(
 }
 
 void SurakartaDaemon::Execute() {
+    game_.StartGame();
     auto black_agent = black_agent_factory_->CreateAgent(*this, PieceColor::BLACK);
     auto white_agent = white_agent_factory_->CreateAgent(*this, PieceColor::WHITE);
-    game_.StartGame();
     auto current = PieceColor::BLACK;
     while (!game_.IsEnd()) {
         status_ = current == PieceColor::BLACK ? ExecuteStatus::WAITING_FOR_BLACK_AGENT : ExecuteStatus::WAITING_FOR_WHITE_AGENT;
