@@ -103,6 +103,7 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
     }
 
     SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
+    SurakartaEvent<> OnWaitingForMove;
 
    private:
     friend class SurakartaAgentInteractiveFactory;
@@ -126,6 +127,9 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
             if (opt_trace.has_value())
                 OnMoveCommitted.Invoke(opt_trace.value());
         });
+        inner_agent_.OnWaitingForMove.AddListener([this]() {
+            OnWaitingForMove.Invoke();
+        });
     }
 
     /// @note This class is thread safe.
@@ -140,6 +144,7 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
             if (is_waiting_for_move_)
                 throw std::runtime_error("Cannot calculate move while already waiting for one!");
             is_waiting_for_move_ = true;
+            OnWaitingForMove.Invoke();
             move_cv_.wait(lk, [this] { return !is_waiting_for_move_; });
             return SurakartaMove(
                 SurakartaPosition(move_.from.x, move_.from.y),
@@ -158,6 +163,9 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
             is_waiting_for_move_ = false;
             move_cv_.notify_one();
         }
+
+        /// @brief This event will be invoked when the agent begins to wait for move.
+        SurakartaEvent<> OnWaitingForMove;
 
        private:
         friend class SurakartaAgentInteractive;
@@ -222,6 +230,7 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
     std::optional<std::unique_ptr<SurakartaAgentInteractive>> agent_;
     AgentProxy* volatile proxy_;
     SurakartaAgentInteractiveHandler* handler_;
+    mutable std::mutex agent_creation_blocker_;
 
    public:
     SurakartaAgentInteractiveFactory(SurakartaAgentInteractiveHandler* handler)
@@ -236,6 +245,7 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
 
     virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor my_color) {
         // //std::lock_guard lk(*mutex_);
+        std::lock_guard lk(agent_creation_blocker_);
         if (agent_.has_value()) {
             throw std::runtime_error("SurakartaAgentInteractiveFactory can only create one agent!");
         }
@@ -246,13 +256,24 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
             agent_.value()->game_info_,
             agent_.value()->rule_manager_,
             this);
-        if (handler_)
+        if (handler_) {
             agent_.value()->OnMoveCommitted.AddListener([this](SurakartaMoveTrace trace) {
                 handler_->OnMoveCommitted.Invoke(trace);
             });
-        else
+            agent_.value()->OnWaitingForMove.AddListener([this]() {
+                handler_->OnWaitingForMove.Invoke();
+            });
+        } else
             printf("Warning: SurakartaAgentInteractiveHandler has been destroyed, so OnMoveCommitted will not be invoked.\n");
         return std::unique_ptr<AgentProxy>(proxy_ptr);
+    }
+
+    void BlockAgentCreation() const {
+        agent_creation_blocker_.lock();
+    }
+
+    void UnblockAgentCreation() const {
+        agent_creation_blocker_.unlock();
     }
 };
 
@@ -270,6 +291,14 @@ std::shared_ptr<SurakartaDaemon::AgentFactory> SurakartaAgentInteractiveHandler:
 bool SurakartaAgentInteractiveHandler::IsAgentCreated() {
     // std::lock_guard lk(*mutex_);
     return agent_factory_->agent_.has_value();
+}
+
+void SurakartaAgentInteractiveHandler::BlockAgentCreation() {
+    agent_factory_->BlockAgentCreation();
+}
+
+void SurakartaAgentInteractiveHandler::UnblockAgentCreation() {
+    agent_factory_->UnblockAgentCreation();
 }
 
 bool SurakartaAgentInteractiveHandler::IsMyTurn() {
