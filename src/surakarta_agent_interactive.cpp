@@ -131,11 +131,14 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
     /// @note This class is thread safe.
     class SurakartaAgentPassive : public SurakartaAgentBase {
        public:
-        bool IsWaitingForMove() const { return is_waiting_for_move_; }
+        bool IsWaitingForMove() const {
+            std::lock_guard lk(move_mutex_);
+            return is_waiting_for_move_;
+        }
         SurakartaMove CalculateMove() {
+            auto lk = std::unique_lock<std::mutex>(move_mutex_);
             if (is_waiting_for_move_)
                 throw std::runtime_error("Cannot calculate move while already waiting for one!");
-            auto lk = std::unique_lock<std::mutex>(move_mutex_);
             is_waiting_for_move_ = true;
             move_cv_.wait(lk, [this] { return !is_waiting_for_move_; });
             return SurakartaMove(
@@ -144,17 +147,15 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
                 move_.player);
         }
         void CommitMove(SurakartaMove move) {
+            auto lk = std::lock_guard<std::mutex>(move_mutex_);
             if (!is_waiting_for_move_)
                 throw std::runtime_error("Cannot commit move while not waiting for one!");
-            {
-                auto lk = std::lock_guard<std::mutex>(move_mutex_);
-                move_.from.x = move.from.x;
-                move_.from.y = move.from.y;
-                move_.to.x = move.to.x;
-                move_.to.y = move.to.y;
-                move_.player = move.player;
-                is_waiting_for_move_ = false;
-            }
+            move_.from.x = move.from.x;
+            move_.from.y = move.from.y;
+            move_.to.x = move.to.x;
+            move_.to.y = move.to.y;
+            move_.player = move.player;
+            is_waiting_for_move_ = false;
             move_cv_.notify_one();
         }
 
@@ -162,9 +163,9 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
         friend class SurakartaAgentInteractive;
         SurakartaAgentPassive(SurakartaDaemon& daemon)
             : SurakartaAgentBase(daemon.Board(), daemon.GameInfo(), daemon.RuleManager()) {}
-        volatile bool is_waiting_for_move_ = false;
-        volatile SurakartaMove move_;
-        std::mutex move_mutex_;
+        bool is_waiting_for_move_ = false;
+        SurakartaMove move_;
+        mutable std::mutex move_mutex_;
         std::condition_variable move_cv_;
     };
 
