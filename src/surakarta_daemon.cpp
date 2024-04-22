@@ -32,8 +32,10 @@ SurakartaDaemon::SurakartaDaemon(
 
 void SurakartaDaemon::Execute() {
     game_.StartGame();
-    auto black_agent = black_agent_factory_->CreateAgent(*this, PieceColor::BLACK);
-    auto white_agent = white_agent_factory_->CreateAgent(*this, PieceColor::WHITE);
+    auto black_agent = black_agent_factory_->CreateAgent(
+        game_.GetGameInfo(), game_.GetBoard(), game_.GetRuleManager(), *this, PieceColor::BLACK);
+    auto white_agent = white_agent_factory_->CreateAgent(
+        game_.GetGameInfo(), game_.GetBoard(), game_.GetRuleManager(), *this, PieceColor::WHITE);
     auto current = PieceColor::BLACK;
     while (!game_.IsEnd()) {
         status_ = current == PieceColor::BLACK ? ExecuteStatus::WAITING_FOR_BLACK_AGENT : ExecuteStatus::WAITING_FOR_WHITE_AGENT;
@@ -41,4 +43,12 @@ void SurakartaDaemon::Execute() {
         current = ReverseColor(current);
     }
     status_ = ExecuteStatus::ENDED;
+}
+
+std::unique_ptr<SurakartaAgentBase> SurakartaDaemon::CreateTemporaryGameAgent(AgentFactory& factory, PieceColor my_color) {
+    auto copy_game_info = std::make_shared<SurakartaGameInfo>(*game_.GetGameInfo());
+    auto copy_board = std::make_shared<SurakartaBoard>(*game_.GetBoard());
+    auto copy_rule_manager = std::make_shared<SurakartaRuleManagerImpl>(
+        copy_board, copy_game_info);
+    return factory.CreateAgent(copy_game_info, copy_board, copy_rule_manager, *this, my_color);
 }

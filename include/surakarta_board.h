@@ -22,6 +22,16 @@ class SurakartaBoard : public std::vector<SurakartRow> {
         }
     }
 
+    SurakartaBoard(const SurakartaBoard& board)
+        : std::vector<SurakartRow>(), board_size_(board.board_size_) {
+        for (int x = 0; x < board_size_; x++) {
+            this->push_back(SurakartRow(board_size_));
+            for (int y = 0; y < board_size_; y++) {
+                (*this)[x][y] = std::make_shared<SurakartaPiece>(*board[x][y]);
+            }
+        }
+    }
+
     bool IsInside(const SurakartaPosition& position) const {
         return position.x >= 0 && position.y >= 0 && position.x < board_size_ && position.y < board_size_;
     }
