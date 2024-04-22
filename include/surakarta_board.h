@@ -23,7 +23,7 @@ class SurakartaBoard : public std::vector<SurakartRow> {
     }
 
     SurakartaBoard(const SurakartaBoard& board)
-        : board_size_(board.board_size_) {
+        : std::vector<SurakartRow>(), board_size_(board.board_size_) {
         for (int x = 0; x < board_size_; x++) {
             this->push_back(SurakartRow(board_size_));
             for (int y = 0; y < board_size_; y++) {
