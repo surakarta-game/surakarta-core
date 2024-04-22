@@ -20,6 +20,11 @@ class SurakartaAgentInteractiveHandler {
     std::shared_ptr<SurakartaDaemon::AgentFactory> GetAgentFactory();
     bool IsAgentCreated();
 
+    /// @brief Agent creation will not happen until UnblockAgentCreation is called.
+    void BlockAgentCreation();
+    /// @brief Eliminate the effect of BlockAgentCreation.
+    void UnblockAgentCreation();
+
     // If the agent is not created, the following functions will return false or default values.
 
     bool IsMyTurn();
@@ -40,6 +45,8 @@ class SurakartaAgentInteractiveHandler {
     bool CanCommitMove();
     bool CommitMove();
 
+    SurakartaEvent<> OnAgentCreated;
+    SurakartaEvent<> OnWaitingForMove;
     SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
 
    private:
