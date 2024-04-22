@@ -12,7 +12,12 @@ class SurakartaDaemon {
 
        private:
         friend SurakartaDaemon;
-        virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor my_color) = 0;
+        virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(
+            std::shared_ptr<SurakartaGameInfo> game_info,
+            std::shared_ptr<SurakartaBoard> board,
+            std::shared_ptr<SurakartaRuleManager> rule_manager,
+            SurakartaDaemon& daemon,
+            PieceColor my_color) = 0;
     };
 
     enum class ExecuteStatus {
@@ -30,13 +35,13 @@ class SurakartaDaemon {
 
     void Execute();
 
+    /// @brief This method will create a temporary game agent, using a copy of the current game state.
+    std::unique_ptr<SurakartaAgentBase> CreateTemporaryGameAgent(AgentFactory& factory, PieceColor my_color);
+
     SurakartaEvent<> OnUpdateBoard;
-    std::shared_ptr<SurakartaGameInfo> GameInfo() const { return game_.GetGameInfo(); }
-    std::shared_ptr<SurakartaBoard> Board() const { return game_.GetBoard(); }
-    std::shared_ptr<SurakartaRuleManager> RuleManager() const { return game_.GetRuleManager(); }
     ExecuteStatus Status() const { return status_; }
 
-   private:
+   protected:
     SurakartaGame game_;
     const std::shared_ptr<AgentFactory> black_agent_factory_;
     const std::shared_ptr<AgentFactory> white_agent_factory_;

@@ -11,6 +11,24 @@
 #define WIN_RANDOM 2
 #define STALEMATE 3
 
+class ExposiveSurakartaDaemon : public SurakartaDaemon {
+   public:
+    ExposiveSurakartaDaemon(
+        int board_size,
+        int max_no_capture_round,
+        std::shared_ptr<AgentFactory> black_agent_factory,
+        std::shared_ptr<AgentFactory> white_agent_factory)
+        : SurakartaDaemon(board_size, max_no_capture_round, black_agent_factory, white_agent_factory) {}
+
+    std::shared_ptr<SurakartaGameInfo> GameInfo() {
+        return game_.GetGameInfo();
+    }
+
+    std::shared_ptr<SurakartaBoard> Board() {
+        return game_.GetBoard();
+    }
+};
+
 int play(int miliseconds = 50,
          bool display = true,
          int depth = SurakartaMoveWeightUtil::DefaultDepth,
@@ -22,7 +40,7 @@ int play(int miliseconds = 50,
     const auto my_colour = GlobalRandomGenerator().getInstance()() % 2 ? PieceColor::BLACK : PieceColor::WHITE;
     const auto agent_factory_black = my_colour == PieceColor::BLACK ? (std::shared_ptr<SurakartaDaemon::AgentFactory>)agent_factory_mine : agent_factory_random;
     const auto agent_factory_white = my_colour == PieceColor::WHITE ? (std::shared_ptr<SurakartaDaemon::AgentFactory>)agent_factory_mine : agent_factory_random;
-    auto daemon = SurakartaDaemon(BOARD_SIZE, MAX_NO_CAPTURE_ROUND, agent_factory_black, agent_factory_white);
+    auto daemon = ExposiveSurakartaDaemon(BOARD_SIZE, MAX_NO_CAPTURE_ROUND, agent_factory_black, agent_factory_white);
 
     const auto black_pieces = std::make_shared<std::vector<SurakartaPositionWithId>>();
     const auto white_pieces = std::make_shared<std::vector<SurakartaPositionWithId>>();
