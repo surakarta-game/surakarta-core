@@ -263,6 +263,7 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
             agent_.value()->OnWaitingForMove.AddListener([this]() {
                 handler_->OnWaitingForMove.Invoke();
             });
+            handler_->OnAgentCreated.Invoke();
         } else
             printf("Warning: SurakartaAgentInteractiveHandler has been destroyed, so OnMoveCommitted will not be invoked.\n");
         return std::unique_ptr<AgentProxy>(proxy_ptr);

@@ -45,8 +45,9 @@ class SurakartaAgentInteractiveHandler {
     bool CanCommitMove();
     bool CommitMove();
 
-    SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
+    SurakartaEvent<> OnAgentCreated;
     SurakartaEvent<> OnWaitingForMove;
+    SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
 
    private:
     std::shared_ptr<SurakartaAgentInteractiveFactory> agent_factory_;
