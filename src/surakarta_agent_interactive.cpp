@@ -70,7 +70,7 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
             return false;
         }
         const auto targets = get_all_legal_target_util_.GetAllLegalTargets(
-            *(*daemon_.Board())[selected_piece_.x][selected_piece_.y]);
+            *(*board_)[selected_piece_.x][selected_piece_.y]);
         for (auto& target : *targets) {
             if (target.x == position.x && target.y == position.y) {
                 return true;
@@ -108,19 +108,24 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
    private:
     friend class SurakartaAgentInteractiveFactory;
 
-    SurakartaAgentInteractive(SurakartaDaemon& daemon, PieceColor my_color)
-        : SurakartaAgentBase(daemon.Board(), daemon.GameInfo(), daemon.RuleManager()),
-          inner_agent_(daemon),
+    SurakartaAgentInteractive(
+        std::shared_ptr<SurakartaGameInfo> game_info,
+        std::shared_ptr<SurakartaBoard> board,
+        std::shared_ptr<SurakartaRuleManager> rule_manager,
+        SurakartaDaemon& daemon,
+        PieceColor my_color)
+        : SurakartaAgentBase(board, game_info, rule_manager),
+          inner_agent_(game_info, board, rule_manager),
           daemon_(daemon),
           my_color_(my_color),
-          get_all_legal_target_util_(daemon.Board()) {
-        const auto piece_lists = SurakartaInitPositionListsUtil(daemon.Board()).InitPositionList();
+          get_all_legal_target_util_(board) {
+        const auto piece_lists = SurakartaInitPositionListsUtil(board).InitPositionList();
         mine_pieces_ = piece_lists.black_list;
         oppo_pieces_ = piece_lists.white_list;
         on_board_update_util_ = std::make_unique<SurakartaOnBoardUpdateUtil>(
             my_color == PieceColor::BLACK ? mine_pieces_ : oppo_pieces_,
             my_color == PieceColor::WHITE ? mine_pieces_ : oppo_pieces_,
-            daemon.Board());
+            board);
         auto& util = *on_board_update_util_;
         daemon_.OnUpdateBoard.AddListener([this, util]() {
             const auto opt_trace = util.UpdateAndGetTrace();
@@ -169,8 +174,11 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
 
        private:
         friend class SurakartaAgentInteractive;
-        SurakartaAgentPassive(SurakartaDaemon& daemon)
-            : SurakartaAgentBase(daemon.Board(), daemon.GameInfo(), daemon.RuleManager()) {}
+        SurakartaAgentPassive(
+            std::shared_ptr<SurakartaGameInfo> game_info,
+            std::shared_ptr<SurakartaBoard> board,
+            std::shared_ptr<SurakartaRuleManager> rule_manager)
+            : SurakartaAgentBase(board, game_info, rule_manager) {}
         bool is_waiting_for_move_ = false;
         SurakartaMove move_;
         mutable std::mutex move_mutex_;
@@ -196,7 +204,7 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
     class AgentProxy : public SurakartaAgentBase {
        private:
         friend class SurakartaAgentInteractiveFactory;
-        SurakartaAgentInteractiveFactory* volatile factory_;
+        SurakartaAgentInteractiveFactory* factory_;
         // std::shared_ptr<std::mutex> mutex_;
 
        public:
@@ -207,15 +215,13 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
             : SurakartaAgentBase(board, game_info, rule_manager), factory_(factory) {}
 
         ~AgentProxy() {
-            // std::lock_guard lk(*mutex_);
             if (factory_ != nullptr) {
-                factory_->agent_.reset();
+                // factory_->agent_.reset();
                 factory_->proxy_ = nullptr;
             }
         }
 
         virtual SurakartaMove CalculateMove() override {
-            // std::lock_guard lk(*mutex_);
             if (factory_ == nullptr) {
                 throw std::runtime_error("SurakartaAgentInteractiveFactory that created this agent is already destroyed!");
             }
@@ -237,19 +243,23 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
         : handler_(handler) {}
 
     ~SurakartaAgentInteractiveFactory() {
-        // //std::lock_guard lk(*mutex_);
         if (proxy_ != nullptr) {
             proxy_->factory_ = nullptr;
         }
     }
 
-    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor my_color) {
+    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(
+        std::shared_ptr<SurakartaGameInfo> game_info,
+        std::shared_ptr<SurakartaBoard> board,
+        std::shared_ptr<SurakartaRuleManager> rule_manager,
+        SurakartaDaemon& daemon [[maybe_unused]],
+        PieceColor my_color) override {
         // //std::lock_guard lk(*mutex_);
         std::lock_guard lk(agent_creation_blocker_);
         if (agent_.has_value()) {
             throw std::runtime_error("SurakartaAgentInteractiveFactory can only create one agent!");
         }
-        auto agent_ptr = new SurakartaAgentInteractive(daemon, my_color);
+        auto agent_ptr = new SurakartaAgentInteractive(game_info, board, rule_manager, daemon, my_color);
         agent_ = std::unique_ptr<SurakartaAgentInteractive>(agent_ptr);
         auto proxy_ptr = new AgentProxy(
             agent_.value()->board_,

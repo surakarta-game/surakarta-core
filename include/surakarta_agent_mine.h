@@ -80,7 +80,9 @@ class SurakartaAgentMineFactory : public SurakartaDaemon::AgentFactory {
     class SurakartaMoveWeightUtilBaseFactory {
        public:
         virtual ~SurakartaMoveWeightUtilBaseFactory() = default;
-        virtual std::unique_ptr<SurakartaMoveWeightUtilBase> CreateUtil(SurakartaDaemon& daemon, PieceColor my_color) = 0;
+        virtual std::unique_ptr<SurakartaMoveWeightUtilBase> CreateUtil(
+            std::shared_ptr<SurakartaBoard> board,
+            PieceColor my_color) = 0;
     };
 
     class SurakartaMoveWeightUtilFactory : public SurakartaMoveWeightUtilBaseFactory {
@@ -91,9 +93,11 @@ class SurakartaAgentMineFactory : public SurakartaDaemon::AgentFactory {
             double beta = SurakartaMoveWeightUtil::DefaultBeta)
             : depth_(depth), alpha_(alpha), beta_(beta) {}
 
-        virtual std::unique_ptr<SurakartaMoveWeightUtilBase> CreateUtil(SurakartaDaemon& daemon, PieceColor my_color) override {
+        virtual std::unique_ptr<SurakartaMoveWeightUtilBase> CreateUtil(
+            std::shared_ptr<SurakartaBoard> board,
+            PieceColor my_color) override {
             return std::make_unique<SurakartaMoveWeightUtil>(
-                daemon.Board(),
+                board,
                 my_color,
                 depth_,
                 alpha_,
@@ -110,13 +114,18 @@ class SurakartaAgentMineFactory : public SurakartaDaemon::AgentFactory {
         : weight_util_factory_(weight_util_factory){};
 
    private:
-    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(SurakartaDaemon& daemon, PieceColor color) override {
+    virtual std::unique_ptr<SurakartaAgentBase> CreateAgent(
+        std::shared_ptr<SurakartaGameInfo> game_info,
+        std::shared_ptr<SurakartaBoard> board,
+        std::shared_ptr<SurakartaRuleManager> rule_manager,
+        SurakartaDaemon& daemon [[maybe_unused]],
+        PieceColor my_color) override {
         return std::make_unique<SurakartaAgentMine>(
-            daemon.Board(),
-            daemon.GameInfo(),
-            daemon.RuleManager(),
-            color,
-            weight_util_factory_->CreateUtil(daemon, color));
+            board,
+            game_info,
+            rule_manager,
+            my_color,
+            weight_util_factory_->CreateUtil(board, my_color));
     }
     const std::shared_ptr<SurakartaMoveWeightUtilBaseFactory> weight_util_factory_;
 };
