@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <algorithm>
 #include "surakarta_common.h"
 #include "surakarta_game.h"
 #include "surakarta_utils.h"
