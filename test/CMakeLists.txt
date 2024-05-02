@@ -1,4 +1,7 @@
-add_subdirectory(../third-party/googletest ${CMAKE_BINARY_DIR}/third-party/googletest/googletest EXCLUDE_FROM_ALL)
+# if gtest not added:
+if(NOT TARGET gtest)
+    add_subdirectory(../third-party/googletest ${CMAKE_BINARY_DIR}/third-party/googletest/googletest EXCLUDE_FROM_ALL)
+endif()
 
 get_filename_component(TEST_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" ABSOLUTE)
 add_definitions(-DTEST_DATA_DIR="${TEST_SOURCE_DIR}/test_data/")
