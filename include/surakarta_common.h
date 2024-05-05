@@ -20,9 +20,6 @@ struct SurakartaMove {
         os << move.from << " -> " << move.to << " (" << move.player << ")";
         return os;
     }
-    bool operator==(const SurakartaMove& other) const {
-        return from == other.from && to == other.to && player == other.player;
-    }
 };
 
 struct SurakartaGameInfo {
@@ -40,6 +37,14 @@ struct SurakartaGameInfo {
           end_reason_(SurakartaEndReason::NONE),
           winner_(SurakartaPlayer::NONE),
           max_no_capture_round_(max_no_capture_round) {}
+
+    SurakartaGameInfo(const SurakartaGameInfo& game_info)
+        : current_player_(game_info.current_player_),
+          num_round_(game_info.num_round_),
+          last_captured_round_(game_info.last_captured_round_),
+          end_reason_(game_info.end_reason_),
+          winner_(game_info.winner_),
+          max_no_capture_round_(game_info.max_no_capture_round_) {}
 
     void Reset() {
         current_player_ = SurakartaPlayer::BLACK;

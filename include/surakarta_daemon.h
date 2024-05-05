@@ -41,8 +41,6 @@ class SurakartaDaemon {
     SurakartaEvent<> OnUpdateBoard;
     ExecuteStatus Status() const { return status_; }
 
-    SurakartaGameInfo CopyGameInfo() const { return *game_.GetGameInfo(); }
-
    protected:
     SurakartaGame game_;
     const std::shared_ptr<AgentFactory> black_agent_factory_;
