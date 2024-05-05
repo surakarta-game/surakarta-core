@@ -1,8 +1,11 @@
 #pragma once
+#include <stdio.h>
 #include <memory>
+#include <stdexcept>
 
 class SurakartaLoggerStream {
    public:
+    virtual ~SurakartaLoggerStream() = default;
     virtual void Log(const char* log) = 0;
 };
 
@@ -45,7 +48,7 @@ class SurakartaLoggerStderr : public SurakartaLogger {
 
 class SurakartaLoggerStreamNull : public SurakartaLoggerStream {
    public:
-    void Log(const char* log) override {}
+    void Log(const char* log [[maybe_unused]]) override {}
 };
 
 class SurakartaLoggerNull : public SurakartaLogger {
