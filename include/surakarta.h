@@ -1,3 +1,4 @@
+#pragma once
 #include "global_random_generator.h"
 #include "surakarta_agent_base.h"
 #include "surakarta_agent_interactive.h"
@@ -8,6 +9,7 @@
 #include "surakarta_daemon.h"
 #include "surakarta_event.h"
 #include "surakarta_game.h"
+#include "surakarta_logger.h"
 #include "surakarta_piece.h"
 #include "surakarta_reason.h"
 #include "surakarta_rule_manager.h"
