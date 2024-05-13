@@ -182,9 +182,26 @@ struct SurakartaMovePathFragment {
     }
 };
 
+class SurakartaAnimationBase {
+   public:
+    struct Point {
+        double x;
+        double y;
+    };
+
+    virtual ~SurakartaAnimationBase() = default;
+
+    // Each call should have milliseconds no less than the previous call.
+    virtual Point PositionAt(int milliseconds) = 0;
+
+    virtual bool Finished() const = 0;
+};
+
 struct SurakartaMoveTrace {
     bool is_capture;
     SurakartaPositionWithId moved_piece;
     SurakartaPositionWithId captured_piece;  // -1 if no piece is captured
     std::vector<SurakartaMovePathFragment> path;
+
+    std::shared_ptr<SurakartaAnimationBase> ToAnimation(int total_milliseconds = 1000) const;
 };
