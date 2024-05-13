@@ -1,4 +1,5 @@
 #include <malloc.h>
+#define _USE_MATH_DEFINES  // See: https://learn.microsoft.com/en-us/cpp/c-runtime-library/math-constants?view=msvc-170
 #include <cmath>
 #include <memory>
 #include <vector>
@@ -51,7 +52,7 @@ constexpr int pi3d2 = 4712;
 SurakartaAnimationImpl::SurakartaAnimationImpl(
     const std::vector<SurakartaMovePathFragment>& trace,
     int total_milliseconds) {
-    total_ = trace.size();
+    total_ = static_cast<int>(trace.size());
     void* memory = malloc((sizeof(SurakartaMovePathFragment) + sizeof(int) * 2) * total_ + sizeof(int) * (total_ + 2));
     trace_ = (SurakartaMovePathFragment*)memory;
     length_ = (int*)(&trace_[total_]);
@@ -63,9 +64,9 @@ SurakartaAnimationImpl::SurakartaAnimationImpl(
         length_[i] = LENGTH(trace_[i]);
         total_length_ += length_[i];
     }
-    const int straight_time = (double)total_milliseconds / total_length_ * ideal;
-    const int slash_time = (double)total_milliseconds / total_length_ * root2;
-    const int curve_time = (double)total_milliseconds / total_length_ * pi3d2;
+    const int straight_time = static_cast<int>((double)total_milliseconds / total_length_ * ideal);
+    const int slash_time = static_cast<int>((double)total_milliseconds / total_length_ * root2);
+    const int curve_time = static_cast<int>((double)total_milliseconds / total_length_ * pi3d2);
     for (int i = 0; i < total_; i++)
         time_[i] = CHOOSE(trace_[i], curve_time * trace_[i].info.curve.radius, straight_time, slash_time);
     start_time_[0] = 0;
@@ -91,9 +92,9 @@ SurakartaAnimationImpl::Point SurakartaAnimationImpl::PositionAt(int millisecond
             index_++;
         else {
             const auto to = trace_[total_ - 1].To();
-            Point ret{
-                .x = static_cast<double>(to.x),
-                .y = static_cast<double>(to.y)};
+            Point ret;
+            ret.x = static_cast<double>(to.x);
+            ret.y = static_cast<double>(to.y);
             return ret;
         }
     }
@@ -107,10 +108,9 @@ SurakartaAnimationImpl::Point SurakartaAnimationImpl::PositionAt(int millisecond
             delta_cached = true;
         }
         const double theta = trace_[index_].info.curve.start_angle * M_PI_2 + (double)(milliseconds - start_time_[index_]) * dtheta;
-        Point ret{
-            .x = trace_[index_].info.curve.center_x + r * cos(theta),
-            .y = trace_[index_].info.curve.center_y + r * sin(theta),
-        };
+        Point ret;
+        ret.x = trace_[index_].info.curve.center_x + r * cos(theta);
+        ret.y = trace_[index_].info.curve.center_y + r * sin(theta);
         return ret;
     } else {
         if (delta_cached == false) {
@@ -120,9 +120,9 @@ SurakartaAnimationImpl::Point SurakartaAnimationImpl::PositionAt(int millisecond
         }
         double x = trace_[index_].info.straight.start_x + (milliseconds - start_time_[index_]) * dx;
         double y = trace_[index_].info.straight.start_y + (milliseconds - start_time_[index_]) * dy;
-        Point ret{
-            .x = x,
-            .y = y};
+        Point ret;
+        ret.x = x;
+        ret.y = y;
         return ret;
     }
 }
