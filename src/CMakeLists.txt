@@ -1,20 +1,20 @@
-SET(GAME_SOURCES
+SET(CORE_SOURCES
     surakarta_reason.cpp
     surakarta_game.cpp
     surakarta_rule_manager.cpp
     surakarta_rule_manager_impl.cpp
     global_random_generator.cpp
-    surakarta_logger.cpp
-    surakarta_utils.cpp)
-SET(AGENT_SOURCES
+    surakarta_utils.cpp
     surakarta_agent_random.cpp
-    surakarta_agent_mine.cpp)
-SET(INTERACTIVE_SOURCES
+    surakarta_agent_mine.cpp
     surakarta_daemon.cpp
-    surakarta_agent_interactive.cpp)
+    surakarta_agent_interactive.cpp
+    surakarta_animation.cpp
+    surakarta_logger.cpp
+)
 
 if(NOT TARGET surakarta)
-    add_library(surakarta STATIC ${GAME_SOURCES} ${AGENT_SOURCES} ${INTERACTIVE_SOURCES})
+    add_library(surakarta STATIC ${CORE_SOURCES})
     set_target_properties(surakarta PROPERTIES POSITION_INDEPENDENT_CODE ON)
     install(TARGETS surakarta)
 endif()

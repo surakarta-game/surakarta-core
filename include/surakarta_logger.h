@@ -1,5 +1,6 @@
 #pragma once
-#include <stdio.h>
+#include <fstream>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -60,22 +61,22 @@ class SurakartaLoggerNull : public SurakartaLogger {
 class SurakartaLoggerStreamFile : public SurakartaLoggerStream {
    public:
     SurakartaLoggerStreamFile(const char* file_path) {
-        file_ = fopen(file_path, "w");
-        if (file_ == nullptr) {
-            throw std::runtime_error("Error opening log file");
+        file_.open(file_path, std::ios::out | std::ios::app);
+        if (!file_.is_open()) {
+            throw std::runtime_error("Failed to open file");
         }
     }
 
     ~SurakartaLoggerStreamFile() {
-        fclose(file_);
+        file_.close();
     }
 
     void Log(const char* log) override {
-        fprintf(file_, "%s\n", log);
+        file_ << log << std::endl;
     }
 
    private:
-    FILE* file_;
+    std::fstream file_;
 };
 
 class SurakartaLoggerFile : public SurakartaLogger {
