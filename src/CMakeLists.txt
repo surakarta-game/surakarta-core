@@ -10,6 +10,7 @@ SET(CORE_SOURCES
     surakarta_daemon.cpp
     surakarta_agent_interactive.cpp
     surakarta_animation.cpp
+    surakarta_logger.cpp
 )
 
 if(NOT TARGET surakarta)

@@ -132,14 +132,51 @@ class SurakartaApplyMoveUtil {
     void RevertMove();
 };
 
+class SurakartaApplyMoveWithGameInfoUtil {
+   private:
+    const std::shared_ptr<SurakartaBoard> board_;
+    SurakartaApplyMoveUtil apply_move_util_;
+    const std::shared_ptr<SurakartaGameInfo> game_info_;
+    const SurakartaGameInfo game_info_backup_;
+
+   public:
+    SurakartaApplyMoveWithGameInfoUtil(
+        std::shared_ptr<SurakartaBoard> board,
+        std::shared_ptr<SurakartaGameInfo> game_info)
+        : board_(board),
+          apply_move_util_(board),
+          game_info_(game_info),
+          game_info_backup_(*game_info) {}
+
+    void ApplyMove(const SurakartaMove& move);
+    void RevertMove();
+};
+
+class SurakartaTemporarilyApplyMoveWithGameInfoGuardUtil {
+   private:
+    SurakartaApplyMoveWithGameInfoUtil apply_move_util_;
+
+   public:
+    SurakartaTemporarilyApplyMoveWithGameInfoGuardUtil(
+        std::shared_ptr<SurakartaBoard> board,
+        std::shared_ptr<SurakartaGameInfo> game_info,
+        const SurakartaMove& move)
+        : apply_move_util_(board, game_info) {
+        apply_move_util_.ApplyMove(move);
+    }
+
+    ~SurakartaTemporarilyApplyMoveWithGameInfoGuardUtil() {
+        apply_move_util_.RevertMove();
+    }
+};
+
 class SurakartaTemporarilyApplyMoveGuardUtil {
    private:
-    const std::shared_ptr<const SurakartaBoard> board_;
     SurakartaApplyMoveUtil apply_move_util_;
 
    public:
     SurakartaTemporarilyApplyMoveGuardUtil(std::shared_ptr<const SurakartaBoard> board, const SurakartaMove& move)
-        : board_(board), apply_move_util_(board) {
+        : apply_move_util_(board) {
         apply_move_util_.ApplyMove(move);
     }
 
