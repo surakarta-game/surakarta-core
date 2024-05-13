@@ -1,4 +1,5 @@
 #include "surakarta_utils.h"
+#include "surakarta_rule_manager_impl.h"
 
 std::pair<int, int> operator+(SurakartaPosition position, SurakartaDirectionStraight direction) {
     return direction == SurakartaDirectionStraight::UP
@@ -293,6 +294,29 @@ void SurakartaApplyMoveUtil::ApplyMove(const SurakartaMove& move) {
 void SurakartaApplyMoveUtil::RevertMove() {
     Pop();
     Pop();
+}
+
+void SurakartaApplyMoveWithGameInfoUtil::ApplyMove(const SurakartaMove& move) {
+    const bool is_capture = (*board_)[move.to.x][move.to.y]->GetColor() != PieceColor::NONE;
+    if (is_capture) {
+        game_info_->last_captured_round_ = game_info_->num_round_;
+    }
+    SurakartaRuleManagerImpl rule_manager(board_, game_info_);
+    const auto [end_reason, winner] = rule_manager.JudgeEnd(
+        is_capture ? SurakartaIllegalMoveReason::LEGAL_CAPTURE_MOVE : SurakartaIllegalMoveReason::LEGAL_NON_CAPTURE_MOVE);
+    if (!IsEndReason(end_reason)) {
+        game_info_->current_player_ = ReverseColor(game_info_->current_player_);
+        game_info_->num_round_++;
+    } else {
+        game_info_->end_reason_ = end_reason;
+        game_info_->winner_ = winner;
+    }
+    apply_move_util_.ApplyMove(move);
+}
+
+void SurakartaApplyMoveWithGameInfoUtil::RevertMove() {
+    *game_info_ = game_info_backup_;
+    apply_move_util_.RevertMove();
 }
 
 bool SurakartaMovablityUtil::IsMovableToNoneCapture(const SurakartaPiece& piece, const SurakartaPiece& piece_to) const {
