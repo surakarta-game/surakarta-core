@@ -14,7 +14,7 @@ SET(CORE_SOURCES
 )
 
 if(NOT TARGET surakarta)
-    add_library(surakarta STATIC ${CORE_SOURCES})
+    add_library(surakarta SHARED ${CORE_SOURCES})
     set_target_properties(surakarta PROPERTIES POSITION_INDEPENDENT_CODE ON)
     install(TARGETS surakarta)
 endif()
