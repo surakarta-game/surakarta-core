@@ -120,11 +120,13 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
           my_color_(my_color),
           get_all_legal_target_util_(board) {
         const auto piece_lists = SurakartaInitPositionListsUtil(board).InitPositionList();
-        mine_pieces_ = piece_lists.black_list;
-        oppo_pieces_ = piece_lists.white_list;
+        if (my_color != PieceColor::BLACK && my_color != PieceColor::WHITE)
+            throw std::runtime_error("Invalid my_color in SurakartaAgentInteractive!");
+        mine_pieces_ = my_color == PieceColor::BLACK ? piece_lists.black_list : piece_lists.white_list;
+        oppo_pieces_ = my_color == PieceColor::BLACK ? piece_lists.white_list : piece_lists.black_list;
         on_board_update_util_ = std::make_unique<SurakartaOnBoardUpdateUtil>(
-            my_color == PieceColor::BLACK ? mine_pieces_ : oppo_pieces_,
-            my_color == PieceColor::WHITE ? mine_pieces_ : oppo_pieces_,
+            piece_lists.black_list,
+            piece_lists.white_list,
             board);
         auto& util = *on_board_update_util_;
         daemon_.OnUpdateBoard.AddListener([this, util]() {
