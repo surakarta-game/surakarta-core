@@ -44,10 +44,12 @@ class SurakartaAgentInteractiveHandler {
 
     bool CanCommitMove();
     bool CommitMove();
+    void CommitMoveRaw(SurakartaMove move);
 
     SurakartaEvent<> OnAgentCreated;
     SurakartaEvent<> OnWaitingForMove;
     SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
+    SurakartaEvent<SurakartaMoveResponse> OnGameEnded;
 
    private:
     std::shared_ptr<SurakartaAgentInteractiveFactory> agent_factory_;

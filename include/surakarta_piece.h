@@ -199,6 +199,7 @@ class SurakartaAnimationBase {
 
 struct SurakartaMoveTrace {
     bool is_capture;
+    PieceColor color;
     SurakartaPositionWithId moved_piece;
     SurakartaPositionWithId captured_piece;  // -1 if no piece is captured
     std::vector<SurakartaMovePathFragment> path;

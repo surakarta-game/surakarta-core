@@ -546,6 +546,7 @@ SurakartaMoveTrace SurakartaTraceGenerateUtil::GenerateNoneCaptured(SurakartaPos
     const auto id_position_list = (*board_)[from.x][from.y]->GetColor() == PieceColor::BLACK ? id_position_list_black_ : id_position_list_white_;
     auto trace = SurakartaMoveTrace();
     trace.is_capture = false;
+    trace.color = (*board_)[from.x][from.y]->GetColor();
     trace.moved_piece.id = -1;
     for (unsigned i = 0; i < id_position_list->size(); i++) {
         if ((*id_position_list)[i].x == from.x && (*id_position_list)[i].y == from.y) {
@@ -575,6 +576,7 @@ SurakartaMoveTrace SurakartaTraceGenerateUtil::GenerateCaptured(SurakartaPositio
     const auto oppo_list = (*board_)[from.x][from.y]->GetColor() == PieceColor::BLACK ? id_position_list_white_ : id_position_list_black_;
     auto trace = SurakartaMoveTrace();
     trace.is_capture = true;
+    trace.color = (*board_)[from.x][from.y]->GetColor();
     trace.moved_piece.id = -1;
     for (unsigned i = 0; i < curr_list->size(); i++) {
         if ((*curr_list)[i].x == from.x && (*curr_list)[i].y == from.y) {

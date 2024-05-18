@@ -102,8 +102,13 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
         return true;
     }
 
+    void CommitMoveRaw(SurakartaMove move) {
+        inner_agent_.CommitMove(move);
+    }
+
     SurakartaEvent<SurakartaMoveTrace> OnMoveCommitted;
     SurakartaEvent<> OnWaitingForMove;
+    SurakartaEvent<SurakartaMoveResponse> OnGameEnded;
 
    private:
     friend class SurakartaAgentInteractiveFactory;
@@ -136,6 +141,9 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
         });
         inner_agent_.OnWaitingForMove.AddListener([this]() {
             OnWaitingForMove.Invoke();
+        });
+        daemon.OnGameEnded.AddListener([this](SurakartaMoveResponse response) {
+            OnGameEnded.Invoke(response);
         });
     }
 
@@ -275,6 +283,9 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
             agent_.value()->OnWaitingForMove.AddListener([this]() {
                 handler_->OnWaitingForMove.Invoke();
             });
+            agent_.value()->OnGameEnded.AddListener([this](SurakartaMoveResponse response) {
+                handler_->OnGameEnded.Invoke(response);
+            });
             handler_->OnAgentCreated.Invoke();
         } else
             printf("Warning: SurakartaAgentInteractiveHandler has been destroyed, so OnMoveCommitted will not be invoked.\n");
@@ -392,4 +403,11 @@ bool SurakartaAgentInteractiveHandler::CommitMove() {
     if (!agent_factory_->agent_.has_value())
         return false;
     return agent_factory_->agent_.value()->CommitMove();
+}
+
+void SurakartaAgentInteractiveHandler::CommitMoveRaw(SurakartaMove move) {
+    // std::lock_guard lk(*mutex_);
+    if (!agent_factory_->agent_.has_value())
+        return;
+    agent_factory_->agent_.value()->CommitMoveRaw(move);
 }
