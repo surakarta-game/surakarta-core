@@ -30,6 +30,9 @@ enum class SurakartaEndReason {
     ILLIGAL_MOVE,  // one player makes an illegal move
 };
 
+std::string SurakartaToString(SurakartaIllegalMoveReason reason);
+std::string SurakartaToString(SurakartaEndReason reason);
+
 bool IsLegalMoveReason(SurakartaIllegalMoveReason reason);
 bool IsEndReason(SurakartaEndReason reason);
 

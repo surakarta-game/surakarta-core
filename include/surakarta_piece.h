@@ -9,6 +9,19 @@ enum class PieceColor : PieceColorMemoryType { BLACK,
                                                UNKNOWN
 };
 
+inline std::string SurakartaToString(PieceColor color) {
+    switch (color) {
+        case PieceColor::NONE:
+            return ".";
+        case PieceColor::BLACK:
+            return "B";
+        case PieceColor::WHITE:
+            return "W";
+        default:
+            return "?";
+    }
+}
+
 using SurakartaPlayer = PieceColor;
 
 inline PieceColor ReverseColor(PieceColor color) {
