@@ -37,11 +37,13 @@ void SurakartaDaemon::Execute() {
     auto white_agent = white_agent_factory_->CreateAgent(
         game_.GetGameInfo(), game_.GetBoard(), game_.GetRuleManager(), *this, PieceColor::WHITE);
     auto current = PieceColor::BLACK;
+    SurakartaMoveResponse response(SurakartaIllegalMoveReason::GAME_NOT_START, SurakartaEndReason::NONE, PieceColor::UNKNOWN);
     while (!game_.IsEnd()) {
         status_ = current == PieceColor::BLACK ? ExecuteStatus::WAITING_FOR_BLACK_AGENT : ExecuteStatus::WAITING_FOR_WHITE_AGENT;
-        game_.Move(current == PieceColor::BLACK ? black_agent->CalculateMove() : white_agent->CalculateMove());
+        response = game_.Move(current == PieceColor::BLACK ? black_agent->CalculateMove() : white_agent->CalculateMove());
         current = ReverseColor(current);
     }
+    OnGameEnded.Invoke(response);
     status_ = ExecuteStatus::ENDED;
 }
 

@@ -1,5 +1,57 @@
 #include "surakarta_reason.h"
 
+std::string SurakartaToString(SurakartaIllegalMoveReason reason) {
+    switch (reason) {
+        case SurakartaIllegalMoveReason::LEGAL:
+            return "LEGAL";
+        case SurakartaIllegalMoveReason::LEGAL_CAPTURE_MOVE:
+            return "LEGAL_CAPTURE_MOVE";
+        case SurakartaIllegalMoveReason::LEGAL_NON_CAPTURE_MOVE:
+            return "LEGAL_NON_CAPTURE_MOVE";
+        case SurakartaIllegalMoveReason::ILLIGAL:
+            return "ILLIGAL";
+        case SurakartaIllegalMoveReason::NOT_PLAYER_TURN:
+            return "NOT_PLAYER_TURN";
+        case SurakartaIllegalMoveReason::OUT_OF_BOARD:
+            return "OUT_OF_BOARD";
+        case SurakartaIllegalMoveReason::NOT_PIECE:
+            return "NOT_PIECE";
+        case SurakartaIllegalMoveReason::NOT_PLAYER_PIECE:
+            return "NOT_PLAYER_PIECE";
+        case SurakartaIllegalMoveReason::ILLIGAL_CAPTURE_MOVE:
+            return "ILLIGAL_CAPTURE_MOVE";
+        case SurakartaIllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE:
+            return "ILLIGAL_NON_CAPTURE_MOVE";
+        case SurakartaIllegalMoveReason::GAME_ALREADY_END:
+            return "GAME_ALREADY_END";
+        case SurakartaIllegalMoveReason::GAME_NOT_START:
+            return "GAME_NOT_START";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+std::string SurakartaToString(SurakartaEndReason reason) {
+    switch (reason) {
+        case SurakartaEndReason::NONE:
+            return "NONE";
+        case SurakartaEndReason::STALEMATE:
+            return "STALEMATE";
+        case SurakartaEndReason::CHECKMATE:
+            return "CHECKMATE";
+        case SurakartaEndReason::TRAPPED:
+            return "TRAPPED";
+        case SurakartaEndReason::RESIGN:
+            return "RESIGN";
+        case SurakartaEndReason::TIMEOUT:
+            return "TIMEOUT";
+        case SurakartaEndReason::ILLIGAL_MOVE:
+            return "ILLIGAL_MOVE";
+        default:
+            return "UNKNOWN";
+    }
+}
+
 bool IsLegalMoveReason(SurakartaIllegalMoveReason reason) {
     switch (reason) {
         case SurakartaIllegalMoveReason::LEGAL:
@@ -21,47 +73,7 @@ bool IsEndReason(SurakartaEndReason reason) {
 }
 
 std::ostream& operator<<(std::ostream& os, const SurakartaIllegalMoveReason& reason) {
-    switch (reason) {
-        case SurakartaIllegalMoveReason::LEGAL:
-            os << "LEGAL";
-            break;
-        case SurakartaIllegalMoveReason::LEGAL_CAPTURE_MOVE:
-            os << "LEGAL_CAPTURE_MOVE";
-            break;
-        case SurakartaIllegalMoveReason::LEGAL_NON_CAPTURE_MOVE:
-            os << "LEGAL_NON_CAPTURE_MOVE";
-            break;
-        case SurakartaIllegalMoveReason::ILLIGAL:
-            os << "ILLIGAL";
-            break;
-        case SurakartaIllegalMoveReason::NOT_PLAYER_TURN:
-            os << "NOT_PLAYER_TURN";
-            break;
-        case SurakartaIllegalMoveReason::OUT_OF_BOARD:
-            os << "OUT_OF_BOARD";
-            break;
-        case SurakartaIllegalMoveReason::NOT_PIECE:
-            os << "NOT_PIECE";
-            break;
-        case SurakartaIllegalMoveReason::NOT_PLAYER_PIECE:
-            os << "NOT_PLAYER_PIECE";
-            break;
-        case SurakartaIllegalMoveReason::ILLIGAL_CAPTURE_MOVE:
-            os << "ILLIGAL_CAPTURE_MOVE";
-            break;
-        case SurakartaIllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE:
-            os << "ILLIGAL_NON_CAPTURE_MOVE";
-            break;
-        case SurakartaIllegalMoveReason::GAME_ALREADY_END:
-            os << "GAME_ALREADY_END";
-            break;
-        case SurakartaIllegalMoveReason::GAME_NOT_START:
-            os << "GAME_NOT_START";
-            break;
-        default:
-            os << "UNKNOWN";
-            break;
-    }
+    os << SurakartaToString(reason);
     return os;
 }
 
@@ -99,32 +111,7 @@ std::istream& operator>>(std::istream& is, SurakartaIllegalMoveReason& reason) {
 }
 
 std::ostream& operator<<(std::ostream& os, const SurakartaEndReason& reason) {
-    switch (reason) {
-        case SurakartaEndReason::NONE:
-            os << "NONE";
-            break;
-        case SurakartaEndReason::STALEMATE:
-            os << "STALEMATE";
-            break;
-        case SurakartaEndReason::CHECKMATE:
-            os << "CHECKMATE";
-            break;
-        case SurakartaEndReason::TRAPPED:
-            os << "TRAPPED";
-            break;
-        case SurakartaEndReason::RESIGN:
-            os << "RESIGN";
-            break;
-        case SurakartaEndReason::TIMEOUT:
-            os << "TIMEOUT";
-            break;
-        case SurakartaEndReason::ILLIGAL_MOVE:
-            os << "ILLIGAL_MOVE";
-            break;
-        default:
-            os << "UNKNOWN";
-            break;
-    }
+    os << SurakartaToString(reason);
     return os;
 }
 

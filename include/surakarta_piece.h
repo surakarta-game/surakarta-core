@@ -9,6 +9,19 @@ enum class PieceColor : PieceColorMemoryType { BLACK,
                                                UNKNOWN
 };
 
+inline std::string SurakartaToString(PieceColor color) {
+    switch (color) {
+        case PieceColor::NONE:
+            return ".";
+        case PieceColor::BLACK:
+            return "B";
+        case PieceColor::WHITE:
+            return "W";
+        default:
+            return "?";
+    }
+}
+
 using SurakartaPlayer = PieceColor;
 
 inline PieceColor ReverseColor(PieceColor color) {
@@ -199,6 +212,7 @@ class SurakartaAnimationBase {
 
 struct SurakartaMoveTrace {
     bool is_capture;
+    PieceColor color;
     SurakartaPositionWithId moved_piece;
     SurakartaPositionWithId captured_piece;  // -1 if no piece is captured
     std::vector<SurakartaMovePathFragment> path;

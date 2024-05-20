@@ -1,6 +1,7 @@
 #include "surakarta_logger.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include <chrono>
 #include <stdexcept>
 #include <vector>
 
@@ -29,5 +30,16 @@ void SurakartaLogger::Log(const char* format, ...) {
         va_end(args);
     }
 
-    stream_->Log(buffer.data());
+    // Add time prefix:
+    auto now = std::chrono::system_clock::now();
+    auto now_c = std::chrono::system_clock::to_time_t(now);
+    auto now_tm = std::localtime(&now_c);
+    char time_buffer[32];
+    std::strftime(time_buffer, sizeof(time_buffer), "[%H:%M:%S] ", now_tm);
+
+    std::string log;
+    log += time_buffer;
+    log += buffer.data();
+
+    stream_->Log(log.c_str());
 }
