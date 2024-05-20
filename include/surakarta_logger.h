@@ -100,3 +100,18 @@ class SurakartaLoggerStreamMultiple : public SurakartaLoggerStream {
     std::shared_ptr<SurakartaLoggerStream> stream1_;
     std::shared_ptr<SurakartaLoggerStream> stream2_;
 };
+
+class SurakartaLoggerStreamWithPrefix : public SurakartaLoggerStream {
+   public:
+    SurakartaLoggerStreamWithPrefix(std::shared_ptr<SurakartaLoggerStream> stream, std::string prefix)
+        : stream_(stream), prefix_(prefix) {}
+
+    void Log(const char* log) override {
+        std::string log_str = prefix_ + log;
+        stream_->Log(log_str.c_str());
+    }
+
+   private:
+    std::shared_ptr<SurakartaLoggerStream> stream_;
+    std::string prefix_;
+};

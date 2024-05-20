@@ -39,6 +39,7 @@ class SurakartaDaemon {
     std::unique_ptr<SurakartaAgentBase> CreateTemporaryGameAgent(AgentFactory& factory, PieceColor my_color);
 
     SurakartaEvent<> OnUpdateBoard;
+    SurakartaEvent<SurakartaMoveResponse> OnGameEnded;
     ExecuteStatus Status() const { return status_; }
 
     SurakartaGameInfo CopyGameInfo() const { return *game_.GetGameInfo(); }
