@@ -16,9 +16,11 @@ class SurakartaLogger {
         : stream_(stream) {}
 
     void Log(const char* format, ...);
+    std::shared_ptr<SurakartaLogger> CreateSublogger(const std::string& prefix);
 
    private:
     std::shared_ptr<SurakartaLoggerStream> stream_;
+    std::string prefix_;
 };
 
 class SurakartaLoggerStreamStdout : public SurakartaLoggerStream {
