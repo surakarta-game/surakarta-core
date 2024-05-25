@@ -8,8 +8,8 @@ class SurakartaEvent {
         listeners_.push_back(listener);
     }
 
-    void RemoveListener(std::function<void(Args...)> listener) {
-        listeners_.erase(std::remove(listeners_.begin(), listeners_.end(), listener), listeners_.end());
+    void RemoveListeners() {
+        listeners_.clear();
     }
 
     void Invoke(Args... args) {
