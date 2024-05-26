@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
                 delay = atoi(argv[++i]);
             }
         }
-        play(delay, true);
+        play(delay, true, depth, alpha, beta);
     } else if (argc > 1 && strcmp(argv[1], "statistic") == 0) {
         int concurrency = std::thread::hardware_concurrency();
         int total_rounds = INT_MAX;

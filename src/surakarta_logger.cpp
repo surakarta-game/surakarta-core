@@ -39,7 +39,14 @@ void SurakartaLogger::Log(const char* format, ...) {
 
     std::string log;
     log += time_buffer;
+    log += prefix_;
     log += buffer.data();
 
     stream_->Log(log.c_str());
+}
+
+std::shared_ptr<SurakartaLogger> SurakartaLogger::CreateSublogger(const std::string& prefix) {
+    auto logger = std::make_shared<SurakartaLogger>(stream_);
+    logger->prefix_ = prefix_ + "[" + prefix + "] ";
+    return logger;
 }

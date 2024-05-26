@@ -297,6 +297,7 @@ class SurakartaAgentInteractiveFactory : public SurakartaDaemon::AgentFactory {
     }
 
     void UnblockAgentCreation() const {
+        agent_creation_blocker_.try_lock();  // avoid unlocking an unlocked mutex
         agent_creation_blocker_.unlock();
     }
 };
