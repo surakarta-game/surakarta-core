@@ -33,6 +33,7 @@ class SurakartaAgentInteractiveHandler {
     // id starts from 0, self-increasing, from black to white.
     std::unique_ptr<std::vector<SurakartaPositionWithId>> CopyMyPieces();
     std::unique_ptr<std::vector<SurakartaPositionWithId>> CopyOpponentPieces();
+    SurakartaGameInfo CopyGameInfo();
 
     SurakartaPositionWithId SelectedPiece();
     bool CanSelectPiece(SurakartaPosition position);
