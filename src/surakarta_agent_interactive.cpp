@@ -25,6 +25,10 @@ class SurakartaAgentInteractive : SurakartaAgentBase {
         return oppo_pieces_;
     }
 
+    SurakartaGameInfo CopyGameInfo() {
+        return daemon_.CopyGameInfo();
+    }
+
     SurakartaPositionWithId SelectedPiece() {
         return selected_piece_;
     }
@@ -411,4 +415,11 @@ void SurakartaAgentInteractiveHandler::CommitMoveRaw(SurakartaMove move) {
     if (!agent_factory_->agent_.has_value())
         return;
     agent_factory_->agent_.value()->CommitMoveRaw(move);
+}
+
+SurakartaGameInfo SurakartaAgentInteractiveHandler::CopyGameInfo() {
+    // std::lock_guard lk(*mutex_);
+    if (!agent_factory_->agent_.has_value())
+        return SurakartaGameInfo();
+    return agent_factory_->agent_.value()->CopyGameInfo();
 }

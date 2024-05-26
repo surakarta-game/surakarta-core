@@ -6,6 +6,7 @@
 
 class SurakartaMoveResponse {
    public:
+    SurakartaMoveResponse() {}
     SurakartaMoveResponse(SurakartaIllegalMoveReason move_reason)
         : move_reason_(move_reason), end_reason_(SurakartaEndReason::NONE), winner_(SurakartaPlayer::NONE) {}
 
